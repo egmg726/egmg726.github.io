@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Emma Gail" />
+
+<meta name="date" content="2019-09-10" />
+
+<title>Combining RBDmap and XL-MS Data for Visualization</title>
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/navigation/tabsets.js"></script>
+<link href="libs/highlightjs/default.css" rel="stylesheet" />
+<script src="libs/highlightjs/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Combining RBDmap and XL-MS Data for Visualization</h1>
+<h4 class="author">Emma Gail</h4>
+<h4 class="date">2019-09-10</h4>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In this tutorial, we will combine XL-MS and RBDmap experimental data in order to show a more complete picture of the interactions occuring on our protein complex of interest, PRC2. For this demonstration, we will data that we initially process using these tutorials.</p>
+<div id="install-crisscrosslinker" class="section level2">
+<h2>Install <code>crisscrosslinkeR</code></h2>
+<p>If you have not done so already, please install <code>crisscrosslinkeR</code>:</p>
+<pre class="r"><code>library(devtools)
+install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
+<pre><code>## Skipping install of &#39;crisscrosslinker&#39; from a github remote, the SHA1 (2238988c) has not changed since last install.
+##   Use `force = TRUE` to force installation</code></pre>
+</div>
+</div>
+<div id="load-library" class="section level1">
+<h1>Load Library</h1>
+<pre class="r"><code>library(crisscrosslinker)</code></pre>
+</div>
+<div id="load-the-data" class="section level1">
+<h1>Load the Data</h1>
+<p>For convenience, the processed data for this workflow has been incorporated into <code>crisscrosslinker</code>. We will be using the following datasets:</p>
+<p>RBDmap</p>
+<ul>
+<li><code>bs_output_repeats_pdb</code></li>
+<li><code>bs_output_repeats_uniprot</code></li>
+</ul>
+<p>XL-MS</p>
+<ul>
+<li><code>xlink.df.filt.pdb</code></li>
+<li><code>xlink.df.uniprot</code></li>
+</ul>
+<p>For the details on how to process this data, please refer to the <a href="https://egmg726.github.io/crisscrosslinker/nsmb_pipeline_ppi.html">XL-MS</a> and <a href="https://egmg726.github.io/crisscrosslinker/nsmb_pipeline_rbdmap.html">RBDmap</a> workflows.</p>
+</div>
+<div id="viewing-xl-ms-and-rbdmap-data-with-xinet" class="section level1">
+<h1>Viewing XL-MS and RBDmap Data with xiNET</h1>
+<p>In order to visualize both the protein-protein and protein-RNA interactions on the same 2D image, we can use the web server xiNET. While xiNET does not explicitly show protein-RNA interactions, we can add them to the image through formatting our data as an annotation file. For more information about what the annotation file is composed of, see the xiNET documentation <a href="http://crosslinkviewer.org/annotationCSV.php">here</a>.</p>
+<div id="xl-ms-data-for-xinet" class="section level2">
+<h2>XL-MS Data for xiNET</h2>
+<p>We can first make the file for xiNET from the protein-protein interaction data.</p>
+<pre class="r"><code>ppi.xinet(xlink.df.uniprot, write_file = TRUE)</code></pre>
+</div>
+<div id="rbdmap-data-for-xinet" class="section level2">
+<h2>RBDmap Data for xiNET</h2>
+<p>Since protein-RNA interactions have been identified as peptides, we can create a file for them for import into xiNET that can be classified as domains. We can see how this would look like by first looking at the heatmap:</p>
+<pre class="r"><code>bs_output_repeats_uniprot_freqvector &lt;- rbd.freqVector(bs_output_repeats_uniprot)</code></pre>
+<pre><code>## Saving 7 x 5 in image</code></pre>
+<p><img src="nsmb_rbdmap_xlms_combo_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>We want to be able to take the information that is on this heatmap and combine it with the protein-protein interaction data to look at it on one image.</p>
+<p>The protein names between the XL-MS and RBDmap experiments should be consistent to ensure that they will be matched appropriately to each bar in xiNET.</p>
+<pre class="r"><code># Error in rbd.xinet(bs_output_repeats_uniprot, write.file = TRUE, colors = &quot;Blues&quot;) : 
+#   object &#39;bs_output_repeats_uniprot_freqvector&#39; not found
+rbd.xinet(bs_output_repeats_uniprot,write.file = TRUE)</code></pre>
+<p>This function will produce an annotation file with the same default colors used for the heatmap above (For more information about what the annotation file is composed of, see the xiNET documentation <a href="http://crosslinkviewer.org/annotationCSV.php">here</a>. By combining this annotation file with the protein-protein interaction data from the XL-MS, you will be able to view both on the same image.</p>
+<p>Once you retrieve the output from xiNET, you should get something like this:</p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_combo/prc2_aep2_xinet_combo_noself.jpg?raw=true" />}</p>
+</div>
+</div>
+<div id="combination-on-pdb-structure-pymol" class="section level1">
+<h1>Combination on PDB Structure (PyMOL)</h1>
+<p>In this instance, we will use the “Blues” palette to denote RBDmap domains and red to designate XL-MS data.</p>
+<pre class="r"><code>rbd_pymol_lines &lt;- rbd.pymol(bs_output_repeats_pdb, color_by=&#39;freq&#39;, write.file = FALSE, colors = c(&#39;#d0d0d0&#39;,&#39;#2f5ac6&#39;,&#39;#e50000&#39;))</code></pre>
+<pre><code>## Saving 7 x 5 in image</code></pre>
+<p><img src="nsmb_rbdmap_xlms_combo_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre><code>##   HEADER    GENE REGULATION                         05-JAN-18   6C23               
+##   HEADER    GENE REGULATION                         05-JAN-18   6C23               
+##   HEADER    GENE REGULATION                         05-JAN-18   6C23               
+##   HEADER    GENE REGULATION                         05-JAN-18   6C23</code></pre>
+<pre class="r"><code>#xlink.df.filt.pdb$freq_color &lt;- rep(&#39;#34978F&#39;,nrow(xlink.df.filt.pdb)) #making all crosslinks red for visibility
+ppi_pymol_lines &lt;- ppi.pymol(xlink.df.filt.pdb,colors=&#39;#34978F&#39;)
+
+final_pymol &lt;- c(rbd_pymol_lines,ppi_pymol_lines) #remove &quot;fetch&quot; and &quot;color gray&quot; commands from PPI
+
+gsub(&#39;custom_color_1&#39;,&#39;custom_color_9&#39;,ppi_pymol_lines)</code></pre>
+<pre><code>##   [1] &quot;cmd.set_color(&#39;custom_color_9&#39;, (0.203921568627451, 0.592156862745098, 0.56078431372549))&quot;
+##   [2] &quot;fetch 6C23, async=0&quot;                                                                      
+##   [3] &quot;color gray&quot;                                                                               
+##   [4] &quot;color NA, /6C23//C/39&quot;                                                                    
+##   [5] &quot;color NA, /6C23//C/30&quot;                                                                    
+##   [6] &quot;distance /6C23//C/39/CA, /6C23//C/30/CA&quot;                                                  
+##   [7] &quot;color NA, dist01&quot;                                                                         
+##   [8] &quot;color NA, /6C23//K/634&quot;                                                                   
+##   [9] &quot;color NA, /6C23//K/713&quot;                                                                   
+##  [10] &quot;distance /6C23//K/634/CA, /6C23//K/713/CA&quot;                                                
+##  [11] &quot;color NA, dist02&quot;                                                                         
+##  [12] &quot;color NA, /6C23//N/212&quot;                                                                   
+##  [13] &quot;color NA, /6C23//N/156&quot;                                                                   
+##  [14] &quot;distance /6C23//N/212/CA, /6C23//N/156/CA&quot;                                                
+##  [15] &quot;color NA, dist03&quot;                                                                         
+##  [16] &quot;color NA, /6C23//L/284&quot;                                                                   
+##  [17] &quot;color NA, /6C23//L/268&quot;                                                                   
+##  [18] &quot;distance /6C23//L/284/CA, /6C23//L/268/CA&quot;                                                
+##  [19] &quot;color NA, dist04&quot;                                                                         
+##  [20] &quot;color NA, /6C23//N/264&quot;                                                                   
+##  [21] &quot;color NA, /6C23//N/307&quot;                                                                   
+##  [22] &quot;distance /6C23//N/264/CA, /6C23//N/307/CA&quot;                                                
+##  [23] &quot;color NA, dist05&quot;                                                                         
+##  [24] &quot;color NA, /6C23//A/537&quot;                                                                   
+##  [25] &quot;color NA, /6C23//A/459&quot;                                                                   
+##  [26] &quot;distance /6C23//A/537/CA, /6C23//A/459/CA&quot;                                                
+##  [27] &quot;color NA, dist06&quot;                                                                         
+##  [28] &quot;color NA, /6C23//Q/128&quot;                                                                   
+##  [29] &quot;color NA, /6C23//Q/130&quot;                                                                   
+##  [30] &quot;distance /6C23//Q/128/CA, /6C23//Q/130/CA&quot;                                                
+##  [31] &quot;color NA, dist07&quot;                                                                         
+##  [32] &quot;color NA, /6C23//N/156&quot;                                                                   
+##  [33] &quot;color NA, /6C23//N/215&quot;                                                                   
+##  [34] &quot;distance /6C23//N/156/CA, /6C23//N/215/CA&quot;                                                
+##  [35] &quot;color NA, dist08&quot;                                                                         
+##  [36] &quot;color NA, /6C23//Q/140&quot;                                                                   
+##  [37] &quot;color NA, /6C23//Q/130&quot;                                                                   
+##  [38] &quot;distance /6C23//Q/140/CA, /6C23//Q/130/CA&quot;                                                
+##  [39] &quot;color NA, dist09&quot;                                                                         
+##  [40] &quot;color NA, /6C23//Q/140&quot;                                                                   
+##  [41] &quot;color NA, /6C23//Q/128&quot;                                                                   
+##  [42] &quot;distance /6C23//Q/140/CA, /6C23//Q/128/CA&quot;                                                
+##  [43] &quot;color NA, dist10&quot;                                                                         
+##  [44] &quot;color NA, /6C23//K/634&quot;                                                                   
+##  [45] &quot;color NA, /6C23//K/713&quot;                                                                   
+##  [46] &quot;distance /6C23//K/634/CA, /6C23//K/713/CA&quot;                                                
+##  [47] &quot;color NA, dist11&quot;                                                                         
+##  [48] &quot;color custom_color_9, /6C23//K/634&quot;                                                       
+##  [49] &quot;color custom_color_9, /6C23//K/569&quot;                                                       
+##  [50] &quot;distance /6C23//K/634/CA, /6C23//K/569/CA&quot;                                                
+##  [51] &quot;color custom_color_9, dist12&quot;                                                             
+##  [52] &quot;color NA, /6C23//K/698&quot;                                                                   
+##  [53] &quot;color NA, /6C23//K/713&quot;                                                                   
+##  [54] &quot;distance /6C23//K/698/CA, /6C23//K/713/CA&quot;                                                
+##  [55] &quot;color NA, dist13&quot;                                                                         
+##  [56] &quot;color NA, /6C23//M/646&quot;                                                                   
+##  [57] &quot;color NA, /6C23//M/650&quot;                                                                   
+##  [58] &quot;distance /6C23//M/646/CA, /6C23//M/650/CA&quot;                                                
+##  [59] &quot;color NA, dist14&quot;                                                                         
+##  [60] &quot;color custom_color_9, /6C23//N/160&quot;                                                       
+##  [61] &quot;color custom_color_9, /6C23//N/120&quot;                                                       
+##  [62] &quot;distance /6C23//N/160/CA, /6C23//N/120/CA&quot;                                                
+##  [63] &quot;color custom_color_9, dist15&quot;                                                             
+##  [64] &quot;color NA, /6C23//C/234&quot;                                                                   
+##  [65] &quot;color NA, /6C23//C/20&quot;                                                                    
+##  [66] &quot;distance /6C23//C/234/CA, /6C23//C/20/CA&quot;                                                 
+##  [67] &quot;color NA, dist16&quot;                                                                         
+##  [68] &quot;color NA, /6C23//P/274&quot;                                                                   
+##  [69] &quot;color NA, /6C23//P/265&quot;                                                                   
+##  [70] &quot;distance /6C23//P/274/CA, /6C23//P/265/CA&quot;                                                
+##  [71] &quot;color NA, dist17&quot;                                                                         
+##  [72] &quot;color custom_color_9, /6C23//P/274&quot;                                                       
+##  [73] &quot;color custom_color_9, /6C23//C/20&quot;                                                        
+##  [74] &quot;distance /6C23//P/274/CA, /6C23//C/20/CA&quot;                                                 
+##  [75] &quot;color custom_color_9, dist18&quot;                                                             
+##  [76] &quot;color NA, /6C23//L/275&quot;                                                                   
+##  [77] &quot;color NA, /6C23//L/268&quot;                                                                   
+##  [78] &quot;distance /6C23//L/275/CA, /6C23//L/268/CA&quot;                                                
+##  [79] &quot;color NA, dist19&quot;                                                                         
+##  [80] &quot;color NA, /6C23//K/602&quot;                                                                   
+##  [81] &quot;color NA, /6C23//K/563&quot;                                                                   
+##  [82] &quot;distance /6C23//K/602/CA, /6C23//K/563/CA&quot;                                                
+##  [83] &quot;color NA, dist20&quot;                                                                         
+##  [84] &quot;color NA, /6C23//L/293&quot;                                                                   
+##  [85] &quot;color NA, /6C23//L/284&quot;                                                                   
+##  [86] &quot;distance /6C23//L/293/CA, /6C23//L/284/CA&quot;                                                
+##  [87] &quot;color NA, dist21&quot;                                                                         
+##  [88] &quot;color NA, /6C23//K/735&quot;                                                                   
+##  [89] &quot;color NA, /6C23//K/713&quot;                                                                   
+##  [90] &quot;distance /6C23//K/735/CA, /6C23//K/713/CA&quot;                                                
+##  [91] &quot;color NA, dist22&quot;                                                                         
+##  [92] &quot;color NA, /6C23//N/26&quot;                                                                    
+##  [93] &quot;color NA, /6C23//N/22&quot;                                                                    
+##  [94] &quot;distance /6C23//N/26/CA, /6C23//N/22/CA&quot;                                                  
+##  [95] &quot;color NA, dist23&quot;                                                                         
+##  [96] &quot;color NA, /6C23//C/20&quot;                                                                    
+##  [97] &quot;color NA, /6C23//C/30&quot;                                                                    
+##  [98] &quot;distance /6C23//C/20/CA, /6C23//C/30/CA&quot;                                                  
+##  [99] &quot;color NA, dist24&quot;                                                                         
+## [100] &quot;color custom_color_9, /6C23//L/106&quot;                                                       
+## [101] &quot;color custom_color_9, /6C23//C/61&quot;                                                        
+## [102] &quot;distance /6C23//L/106/CA, /6C23//C/61/CA&quot;                                                 
+## [103] &quot;color custom_color_9, dist25&quot;                                                             
+## [104] &quot;color custom_color_9, /6C23//Q/143&quot;                                                       
+## [105] &quot;color custom_color_9, /6C23//Q/130&quot;                                                       
+## [106] &quot;distance /6C23//Q/143/CA, /6C23//Q/130/CA&quot;                                                
+## [107] &quot;color custom_color_9, dist26&quot;                                                             
+## [108] &quot;color custom_color_9, /6C23//Q/143&quot;                                                       
+## [109] &quot;color custom_color_9, /6C23//Q/128&quot;                                                       
+## [110] &quot;distance /6C23//Q/143/CA, /6C23//Q/128/CA&quot;                                                
+## [111] &quot;color custom_color_9, dist27&quot;                                                             
+## [112] &quot;color custom_color_9, /6C23//C/20&quot;                                                        
+## [113] &quot;color custom_color_9, /6C23//P/291&quot;                                                       
+## [114] &quot;distance /6C23//C/20/CA, /6C23//P/291/CA&quot;                                                 
+## [115] &quot;color custom_color_9, dist28&quot;                                                             
+## [116] &quot;color custom_color_9, /6C23//K/569&quot;                                                       
+## [117] &quot;color custom_color_9, /6C23//K/735&quot;                                                       
+## [118] &quot;distance /6C23//K/569/CA, /6C23//K/735/CA&quot;                                                
+## [119] &quot;color custom_color_9, dist29&quot;                                                             
+## [120] &quot;hide labels&quot;</code></pre>
+<pre class="r"><code>#PyMOL file
+write(paste((final_pymol),collapse = &#39;\n&#39;),&#39;combined_pymol2.pml&#39;)</code></pre>
+<p>We can then view the resulting .pml file within PyMOL to be able to visualize it. To open a pml file with PyMol either double-click on it or refer to the <a href="http://pymol.sourceforge.net/newman/user/S0210start_cmds.html">PyMol manual</a>.</p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_combo/combined_pymol_surface_hidden.gif?raw=true" style="width:50.0%" /></p>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<pre class="r"><code>devtools::session_info()</code></pre>
+<pre><code>## ─ Session info ──────────────────────────────────────────────────────────
+##  setting  value                       
+##  version  R version 3.5.1 (2018-07-02)
+##  os       macOS  10.14.3              
+##  system   x86_64, darwin15.6.0        
+##  ui       RStudio                     
+##  language (EN)                        
+##  collate  en_US.UTF-8                 
+##  ctype    en_US.UTF-8                 
+##  tz       Australia/Melbourne         
+##  date     2019-09-10                  
+## 
+## ─ Packages ──────────────────────────────────────────────────────────────
+##  package          * version    date       lib
+##  ade4               1.7-13     2018-08-31 [1]
+##  assertthat         0.2.1      2019-03-21 [1]
+##  backports          1.1.4      2019-04-10 [1]
+##  bio3d            * 2.3-4      2018-04-03 [1]
+##  BiocGenerics     * 0.28.0     2018-10-30 [1]
+##  Biostrings       * 2.50.2     2019-01-03 [1]
+##  bitops           * 1.0-6      2013-08-17 [1]
+##  callr              3.3.1      2019-07-18 [1]
+##  cli                1.1.0      2019-03-19 [1]
+##  codetools          0.2-16     2018-12-24 [1]
+##  colorspace         1.4-1      2019-03-18 [1]
+##  crayon             1.3.4      2017-09-16 [1]
+##  crisscrosslinker * 0.9        2019-09-03 [1]
+##  curl             * 4.0        2019-07-22 [1]
+##  desc               1.2.0      2018-05-01 [1]
+##  devtools         * 2.1.0      2019-07-06 [1]
+##  digest             0.6.20     2019-07-04 [1]
+##  dplyr              0.8.3      2019-07-04 [1]
+##  evaluate           0.14       2019-05-28 [1]
+##  fs                 1.3.1      2019-05-06 [1]
+##  gdtools          * 0.1.9      2019-06-18 [1]
+##  ggplot2          * 3.2.1      2019-08-10 [1]
+##  glue               1.3.1      2019-03-12 [1]
+##  gridExtra          2.3        2017-09-09 [1]
+##  gtable             0.3.0      2019-03-25 [1]
+##  highr              0.8        2019-03-20 [1]
+##  htmltools          0.3.6      2017-04-28 [1]
+##  httr             * 1.4.1      2019-08-05 [1]
+##  IRanges          * 2.16.0     2018-10-30 [1]
+##  jsonlite         * 1.6        2018-12-07 [1]
+##  knitr              1.24       2019-08-08 [1]
+##  labeling           0.3        2014-08-23 [1]
+##  lattice            0.20-38    2018-11-04 [1]
+##  lava               1.6.6      2019-08-01 [1]
+##  lazyeval           0.2.2      2019-03-15 [1]
+##  magrittr           1.5        2014-11-22 [1]
+##  MASS               7.3-51.4   2019-03-31 [1]
+##  Matrix             1.2-17     2019-03-22 [1]
+##  memoise            1.1.0      2017-04-21 [1]
+##  munsell            0.5.0      2018-06-12 [1]
+##  openxlsx         * 4.1.0.1    2019-05-28 [1]
+##  pillar             1.4.2      2019-06-29 [1]
+##  pkgbuild           1.0.5      2019-08-26 [1]
+##  pkgconfig          2.0.2      2018-08-16 [1]
+##  pkgload            1.0.2      2018-10-29 [1]
+##  plyr               1.8.4      2016-06-08 [1]
+##  prettyunits        1.0.2      2015-07-13 [1]
+##  processx           3.4.1      2019-07-18 [1]
+##  prodlim            2018.04.18 2018-04-18 [1]
+##  ps                 1.3.0      2018-12-21 [1]
+##  purrr              0.3.2      2019-03-15 [1]
+##  R6                 2.4.0      2019-02-14 [1]
+##  RColorBrewer     * 1.1-2      2014-12-07 [1]
+##  Rcpp               1.0.2      2019-07-25 [1]
+##  RCurl            * 1.95-4.12  2019-03-04 [1]
+##  remotes            2.1.0      2019-06-24 [1]
+##  reshape2         * 1.4.3      2017-12-11 [1]
+##  rlang              0.4.0      2019-06-25 [1]
+##  rmarkdown          1.15       2019-08-21 [1]
+##  rprojroot          1.3-2      2018-01-03 [1]
+##  rstudioapi         0.10       2019-03-19 [1]
+##  S4Vectors        * 0.20.1     2018-11-09 [1]
+##  scales             1.0.0      2018-08-09 [1]
+##  seqinr           * 3.4-5      2017-08-01 [1]
+##  sessioninfo        1.1.1      2018-11-05 [1]
+##  stringi            1.4.3      2019-03-12 [1]
+##  stringr          * 1.4.0      2019-02-10 [1]
+##  survival           2.44-1.1   2019-04-01 [1]
+##  svglite          * 1.2.2      2019-05-17 [1]
+##  testthat           2.2.1      2019-07-25 [1]
+##  tibble             2.1.3      2019-06-06 [1]
+##  tidyselect         0.2.5      2018-10-11 [1]
+##  tufte            * 0.5        2019-05-12 [1]
+##  usethis          * 1.5.1      2019-07-04 [1]
+##  viridis          * 0.5.1      2018-03-29 [1]
+##  viridisLite      * 0.3.0      2018-02-01 [1]
+##  wesanderson      * 0.3.6      2018-04-20 [1]
+##  withr              2.1.2      2018-03-15 [1]
+##  xfun               0.9        2019-08-21 [1]
+##  XML              * 3.98-1.20  2019-06-06 [1]
+##  xml2               1.2.2      2019-08-09 [1]
+##  XVector          * 0.22.0     2018-10-30 [1]
+##  yaml               2.2.0      2018-07-25 [1]
+##  zip                2.0.4      2019-09-01 [1]
+##  zlibbioc           1.28.0     2018-10-30 [1]
+##  source                                   
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  Bioconductor                             
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  Github (egmg726/crisscrosslinker@2238988)
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.1)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+## 
+## [1] /Library/Frameworks/R.framework/Versions/3.5/Resources/library</code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

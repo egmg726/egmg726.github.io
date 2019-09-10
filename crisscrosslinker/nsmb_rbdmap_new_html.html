@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Emma Gail" />
+
+<meta name="date" content="2019-09-10" />
+
+<title>Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</title>
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/navigation/tabsets.js"></script>
+<link href="libs/highlightjs/default.css" rel="stylesheet" />
+<script src="libs/highlightjs/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</h1>
+<h4 class="author">Emma Gail</h4>
+<h4 class="date">2019-09-10</h4>
+
+</div>
+
+
+<p><strong>This tutorial is still under development and may change slightly as it is being edited.</strong></p>
+<div id="a-brief-introduction" class="section level1">
+<h1>A Brief Introduction</h1>
+<p>This tutorial is relevant to the published paper <a href="https://www.nature.com/articles/s41594-019-0197-y">RNA exploits an exposed regulatory site to inhibit the enzymatic activity of PRC2</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. However, the workflow can be used for data processed by MaxQuant.</p>
+</div>
+<div id="setting-up-our-environment" class="section level1">
+<h1>Setting Up Our Environment</h1>
+<div id="install-crisscrosslinker" class="section level2">
+<h2>Install <code>crisscrosslinkeR</code></h2>
+<p>If you have not done so already, please install <code>crisscrosslinkeR</code>:</p>
+<pre class="r"><code>library(devtools)
+install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
+<pre><code>## Skipping install of &#39;crisscrosslinker&#39; from a github remote, the SHA1 (2238988c) has not changed since last install.
+##   Use `force = TRUE` to force installation</code></pre>
+</div>
+<div id="load-libraries" class="section level2">
+<h2>Load Libraries</h2>
+<p>First, load the libraries needed for the package and tutorial.</p>
+<pre class="r"><code>library(ggplot2)
+library(bio3d)
+library(Biostrings)
+library(seqinr)
+library(RColorBrewer)
+library(openxlsx)
+library(viridis)
+library(stringr)
+library(svglite)
+library(crisscrosslinker)</code></pre>
+</div>
+<div id="defining-our-variables" class="section level2">
+<h2>Defining Our Variables</h2>
+<p>When loading the data, it is important to make sure that the files for input are named well so the functions will be able to correctly identify and organize the data. The input files for this analysis are output files of MaxQuant, holding information of tryptic peptides identified in each of the samples.</p>
+<pre class="r"><code>sys.path &lt;- system.file(&quot;extdata/NSMB_RBDmap&quot;,
+                        package = &#39;crisscrosslinker&#39;,
+                        mustWork = TRUE)
+
+
+sys.files &lt;- list.files(sys.path)
+head(sys.files)</code></pre>
+<pre><code>## [1] &quot;Repeat01_NoXL_ArgC_eluate.txt&quot; &quot;Repeat01_NoXL_ArgC_input.txt&quot; 
+## [3] &quot;Repeat01_NoXL_LysC_eluate.txt&quot; &quot;Repeat01_NoXL_LysC_input.txt&quot; 
+## [5] &quot;Repeat01_UV_ArgC_eluate.txt&quot;   &quot;Repeat01_UV_ArgC_input.txt&quot;</code></pre>
+<p>Each of the file names contains 3 pieces of information: the name of the experiment, if it is an input/eluate file, and which protease was used for the experiment.</p>
+<p>If comparing between multiple experiments, indicate the experiment names in the code.</p>
+<pre class="r"><code># experiment_names &lt;- c(&#39;experiment1&#39;,&#39;experiment2&#39;)
+experiment_names &lt;- c(&#39;Repeat02_NoXL&#39;,&#39;Repeat02_UV&#39;)</code></pre>
+<p>We will also need to load the FASTA file that was used during the initial MaxQuant analysis, where the tryptic peptides where identified. For more information on how this FASTA file was generated, please refer to Zhang et al. 2019.</p>
+<pre class="r"><code>fasta_file &lt;- seqinr::read.fasta(system.file(&quot;extdata/NSMB_FASTA&quot;,
+                                             &#39;PRC2_5m.fasta&#39;,
+                                             package = &#39;crisscrosslinker&#39;,
+                                             mustWork = TRUE))</code></pre>
+<p>If the file format is from MaxQuant with an Andromeda score, you will need to set it. The default setting is 20 and we will explicitly set it in this demonstration.</p>
+<pre class="r"><code>cutoff_score &lt;- 20</code></pre>
+</div>
+</div>
+<div id="initializing-the-data" class="section level1">
+<h1>Initializing the Data</h1>
+<div id="extracting-the-hits" class="section level2">
+<h2>Extracting the Hits</h2>
+<p>We are now ready to get a list of the relevant hits for our data.</p>
+<pre class="r"><code>sequence_hit_list &lt;- rbd.makeSeqHitList(fasta_file = fasta_file,
+                                        file_format = &#39;txt&#39;,
+                                        cutoff_score = cutoff_score,
+                                        experiment_directory = sys.path)</code></pre>
+<p>Here we have found all of the tryptic peptides that:</p>
+<ul>
+<li>Have an unambiguous LysC or ArgC cleavage site (i.e. includes R and K in either end, not both ends)</li>
+<li>Correspond to a protein name in the FASTA file</li>
+<li>Have an Andromeda score &gt; our cutoff</li>
+</ul>
+</div>
+<div id="making-an-inputeluate-table" class="section level2">
+<h2>Making an Input/Eluate Table</h2>
+<p>In this case, we want to compare the input and eluate data from the experiments, let’s make a table comparing the two.</p>
+<pre class="r"><code>input_eluate_table &lt;- rbd.makeIETable(sequence_hit_list,
+                                      experiment_names)</code></pre>
+<p>We can see how the results look here:</p>
+<pre class="r"><code>head(input_eluate_table[,c(&#39;sequence&#39;,&#39;input&#39;,&#39;eluate&#39;,&#39;protein&#39;)])</code></pre>
+<table>
+<caption>Input/eluate table</caption>
+<thead>
+<tr class="header">
+<th align="left">sequence</th>
+<th align="right">input</th>
+<th align="right">eluate</th>
+<th align="left">protein</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ASMSEFLESEDGEVEQQR</td>
+<td align="right">288150000</td>
+<td align="right">0</td>
+<td align="left">SUZ12_Q15022</td>
+</tr>
+<tr class="even">
+<td align="left">ATWETILDGK</td>
+<td align="right">2490900000</td>
+<td align="right">0</td>
+<td align="left">SUZ12_Q15022</td>
+</tr>
+<tr class="odd">
+<td align="left">DEVLSADYDLLGEK</td>
+<td align="right">309200000</td>
+<td align="right">0</td>
+<td align="left">EED_O75530</td>
+</tr>
+<tr class="even">
+<td align="left">DPNLLLSVSK</td>
+<td align="right">49414000</td>
+<td align="right">0</td>
+<td align="left">EED_O75530</td>
+</tr>
+<tr class="odd">
+<td align="left">EAAFDDAVEER</td>
+<td align="right">1168100000</td>
+<td align="right">0</td>
+<td align="left">RBBP4_Q09028</td>
+</tr>
+<tr class="even">
+<td align="left">ECDPDLCLTCGAADHWDSK</td>
+<td align="right">149440000</td>
+<td align="right">0</td>
+<td align="left">EZH2_Q15910-2</td>
+</tr>
+</tbody>
+</table>
+<p>In the table above, ‘sequence’ holds the tryptic of identified tryptic peptides that have passed the filtering criteria, ‘input’ and ‘eluate’ hold the intensity observed for these peptides in the input and eluate samples, respectively, and ‘protein’ holds the protein ID.</p>
+<p>We can now move on to making a plot.</p>
+</div>
+<div id="making-an-inputeluate-plot" class="section level2">
+<h2>Making an Input/Eluate Plot</h2>
+<p>As you can see, many of the hits that were found in the input were not found in the eluate. We will filter those later. For now, we will plot everything.</p>
+<pre class="r"><code>rbd.makeIEPlot(input_eluate_table, experiment_names)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/rbd.makeIEPlot-1.png" width="672" /></p>
+<p>We can change the default settings of the plot, including colors and the title by inputting some more variables<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>:</p>
+<pre class="r"><code>name_of_experiment &lt;- &#39;RBDmap Experiments: Input vs. Eluate&#39;
+rbd.makeIEPlot(input_eluate_table,
+               experiment_names,
+               palette = &#39;Pastel1&#39;,
+               fill = &#39;white&#39;,
+               colour = &#39;black&#39;,
+               size = 1,
+               title = name_of_experiment)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+</div>
+<div id="finding-the-binding-sites" class="section level1">
+<h1>Finding the Binding Sites</h1>
+<p>Now that we have compared our control, we will remove all results that do not show up in the eluate files.</p>
+<pre class="r"><code>filtered_input_eluate_table &lt;- input_eluate_table[input_eluate_table$eluate &gt; 0,]
+filtered_input_eluate_table</code></pre>
+<table>
+<caption>Filtered input/eluate table</caption>
+<thead>
+<tr class="header">
+<th align="left">sequence</th>
+<th align="right">input</th>
+<th align="right">eluate</th>
+<th align="left">protein</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ECSVTSDLDFPTQVIPLK</td>
+<td align="right">1101400000</td>
+<td align="right">13380000</td>
+<td align="left">EZH2_Q15910-2</td>
+</tr>
+<tr class="even">
+<td align="left">WLGDLILSK</td>
+<td align="right">1180000000</td>
+<td align="right">14292000</td>
+<td align="left">EED_O75530</td>
+</tr>
+<tr class="odd">
+<td align="left">ECSVTSDLDFPTQVIPLK</td>
+<td align="right">1649500000</td>
+<td align="right">16849000</td>
+<td align="left">EZH2_Q15910-2</td>
+</tr>
+<tr class="even">
+<td align="left">LQLLDGEYEVAMQEMEECPISK</td>
+<td align="right">1057200000</td>
+<td align="right">8763700</td>
+<td align="left">SUZ12_Q15022</td>
+</tr>
+<tr class="odd">
+<td align="left">WLGDLILSK</td>
+<td align="right">1288100000</td>
+<td align="right">22946000</td>
+<td align="left">EED_O75530</td>
+</tr>
+</tbody>
+</table>
+<p>We’ll use these results for finding binding sequences. We’ll first get a data.frame of the binding sequences aligned to the FASTA file.</p>
+<pre class="r"><code>bs_output_fasta &lt;- rbd.getBSfromIET(filtered_input_eluate_table,
+                                    fasta_file = fasta_file,
+                                    align_to = &#39;FASTA&#39;)
+
+bs_output_fasta[c(&#39;pro_name&#39;,&#39;binding_sequence&#39;)]</code></pre>
+<table>
+<caption>Detected binding sequences from FASTA</caption>
+<thead>
+<tr class="header">
+<th align="left">pro_name</th>
+<th align="left">binding_sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">EZH2_Q15910-2</td>
+<td align="left">TLNAVASVPIMYSWSPLQQNFMVEDETVLHNIPYMGDEVLDQDGTFIEELIKNYDGKVHGDR</td>
+</tr>
+<tr class="even">
+<td align="left">EED_O75530</td>
+<td align="left">SCENAIVCWKPGKMEDDIDKIKPSESNVTILGR</td>
+</tr>
+<tr class="odd">
+<td align="left">EZH2_Q15910-2</td>
+<td align="left">QRRIQPVHILTSVSSLRGTR</td>
+</tr>
+<tr class="even">
+<td align="left">SUZ12_Q15022</td>
+<td align="left">NRR</td>
+</tr>
+<tr class="odd">
+<td align="left">EED_O75530</td>
+<td align="left">IHFPDFSTRDIHRNYVDCVR</td>
+</tr>
+</tbody>
+</table>
+<p>Note that the ‘binding_sequence’ column holds the sequences of the peptides that were crosslinked to the RNA, based on the tryptic peptides identified by MaxQuant, the sequence of the protein and the proteases used in the assay (ArgC and LysC); see Castello et al. 2016 for more information on how RNA-binding sites are detected using RBDmap.</p>
+<div id="making-a-heatmap" class="section level2">
+<h2>Making a Heatmap</h2>
+<p>Let’s make a heatmap and sort the sequences by their names.</p>
+<pre class="r"><code>bs_freqVector &lt;- rbd.freqVector(bs_output = bs_output_fasta,
+                                name_by = &#39;pro_name&#39;,
+                                heatmap = TRUE,
+                                db_selection = &#39;FASTA&#39;)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>We can also adjust the colors of the heatmap if we so wish. You can put in a standard <code>RColorBrewer</code> or <code>viridis</code> palette or a list of hexcodes and/or standard R Colors.</p>
+<pre class="r"><code>rbd.freqVector(bs_output = bs_output_fasta,
+               name_by = &#39;pro_name&#39;,
+               heatmap = TRUE,
+               db_selection = &#39;FASTA&#39;,
+               colors = &quot;Blues&quot;,
+               save_plot = FALSE)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>rbd.freqVector(bs_output = bs_output_fasta,
+               name_by = &#39;pro_name&#39;,
+               heatmap = TRUE,
+               db_selection = &#39;FASTA&#39;,
+               colors = c(&#39;#b3ecec&#39;,&#39;#43e8d8&#39;,&#39;#48d1cc&#39;),
+               save_plot = FALSE)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>rbd.freqVector(bs_output = bs_output_fasta,
+               name_by = &#39;pro_name&#39;,
+               heatmap = TRUE,
+               db_selection = &#39;FASTA&#39;,
+               # palette from color-hex.com
+               colors = c(&quot;#465ca8&quot;,&quot;#7767b8&quot;,&quot;#a272c4&quot;,
+                           &quot;#cc7ecc&quot;,&#39;#f38bd1&#39;), 
+               save_plot = FALSE)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>If you require further customization, we recommend saving the output from <code>rbd.freqVector</code> and using that as input for a heatmap. You can use the source code of <code>rbd.freqVector</code> for further information on how this is can be done.</p>
+</div>
+<div id="aligning-peptides-to-a-pdb-file" class="section level2">
+<h2>Aligning Peptides to a PDB File</h2>
+<p>We will now align the binding sequences to a PDB file. For simplicity, we’ll only focus on one protein: EZH2.</p>
+<pre class="r"><code>ezh2_iet &lt;- filtered_input_eluate_table[filtered_input_eluate_table$protein == &#39;EZH2_Q15910-2&#39;,]</code></pre>
+<p>We already know the PDB file and chain that we want to align the proteins to. In this case, we can create and add a new table:</p>
+<pre class="r"><code>protein_dict &lt;- read.csv(system.file(&quot;extdata/NSMB_misc&quot;,
+                                     &#39;PRC2_protein_dict.csv&#39;,
+                                     package = &#39;crisscrosslinker&#39;,
+                                     mustWork = TRUE), fileEncoding=&quot;UTF-8-BOM&quot;)
+protein_dict</code></pre>
+<table>
+<caption>Protein dictionary with corresponding UniProt and PDB identifiers</caption>
+<thead>
+<tr class="header">
+<th align="left">protein_id</th>
+<th align="left">uniprot_id</th>
+<th align="left">pdb_id</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">EZH2_Q15910-2</td>
+<td align="left">Q15910-2</td>
+<td align="left">6C23_C</td>
+</tr>
+<tr class="even">
+<td align="left">EED_O75530</td>
+<td align="left">O75530</td>
+<td align="left">6C23_L</td>
+</tr>
+<tr class="odd">
+<td align="left">RBBP4_Q09028</td>
+<td align="left">Q09028</td>
+<td align="left">6C23_N</td>
+</tr>
+<tr class="even">
+<td align="left">SUZ12_Q15022</td>
+<td align="left">Q15022</td>
+<td align="left">6C23_A</td>
+</tr>
+<tr class="odd">
+<td align="left">AEBP2_Q6ZN18</td>
+<td align="left">Q6ZN18-2</td>
+<td align="left">6C23_P</td>
+</tr>
+</tbody>
+</table>
+<p>Protein ID, as used for MaxQuant analysis, is under ‘protein_id’, with the corresponding UniProt accession number under ‘uniprot_id’. Note that if the canonical UniProt isoform is known, it is added by the user in the form of [ID]-[isoform], or otherwise, the canonical isoform is assumed. The last column, pdb_id, indicate the PDB accession and the chain ID, with the format [PDB accesion]_[chain].</p>
+<p>Now we don’t have to go through menus to be able to define the PDB ID/chain that we need to use. This will save us time when making our table of binding sequences.</p>
+<p>You can always leave the dictionary blank in order to access an interactive menu to be able to use BLAST in order to align your sequence to a known PDB structure.</p>
+<pre class="r"><code>bs_ezh2 &lt;- rbd.getBSfromIET(ezh2_iet,
+                            fasta_file = fasta_file,
+                            align_to = &#39;PDB&#39;,
+                            protein_dict = protein_dict)</code></pre>
+<p>Let’s see how many matches we had to the chain we chose:</p>
+<pre class="r"><code>table(bs_ezh2$db)</code></pre>
+<table>
+<caption>EZH2 PDB Matches</caption>
+<thead>
+<tr class="header">
+<th align="left">Var1</th>
+<th align="right">Freq</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PDB</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>2 linked peptides matched our chain! Let us visualize them on a PDB structure.</p>
+</div>
+<div id="making-the-pymol-file" class="section level2">
+<h2>Making the PyMOL File</h2>
+<p>Now that we have the binding sequences aligned to a PDB file, we can create a PyMOL file (.pml). The <code>rbd.pymol</code> function will produce a .pml file that is essentially a plain text file which contains commands that can be read by PyMOL. Learn more about PyMOL commands <a href="http://pymol.sourceforge.net/newman/user/S0210start_cmds.html">here</a>.</p>
+<pre class="r"><code>rbd.pymol(bs_ezh2, 
+          color_by = &#39;binding_sequence&#39;,
+          colors = NULL) #default colors</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_rbdmap/pymol_generic_colors.png?raw=true" style="width:100.0%" /></p>
+<p>There is an additional legend with the colors corresponding to the binding sequences. The colors will be assigned based on the order the binding sequences are in. If you would like the sequences in a different order, please order them before executing <code>rbd.pymol()</code>.</p>
+<p>If we do not choose any colors, it will default to the PyMOL tints palette. However, we can input any RColorBrewer or viridis palette as well as standard PyMOL/R colors or hexcodes. We can also change the name of the file by editing the <code>file.name</code> variable if we want to test out multiple palettes without overriding previous selections.</p>
+<pre class="r"><code>rbd.pymol(bs_ezh2, 
+          color_by = &#39;binding_sequence&#39;, 
+          colors = &#39;Dark2&#39;, # RColorBrewer palette
+          file.name = &#39;pymol_Dark2.pml&#39;) </code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>rbd.pymol(bs_ezh2, 
+          color_by = &#39;binding_sequence&#39;, 
+          colors = &#39;magma&#39;, # viridis palette
+          file.name = &#39;pymol_magma.pml&#39;) </code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+<pre class="r"><code>rbd.pymol(bs_ezh2, 
+          color_by = &#39;binding_sequence&#39;, 
+          colors = c(&#39;red&#39;,&#39;blue&#39;), # standard colors
+          file.name = &#39;pymol_rgb.pml&#39;) </code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-22-3.png" width="672" /></p>
+<pre class="r"><code>rbd.pymol(bs_ezh2, 
+          color_by = &#39;binding_sequence&#39;, 
+          colors = c(&quot;#f8a1be&quot;,&quot;#ffb6b1&quot;), # hexcodes
+          file.name = &#39;pymol_hexcodes.pml&#39;) </code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-22-4.png" width="672" /></p>
+<p>\begin{fullwidth}  } \end{fullwidth}</p>
+</div>
+</div>
+<div id="visualizing-multiple-repeats" class="section level1">
+<h1>Visualizing Multiple Repeats</h1>
+<p>We have now looked at one experiment, but now we want to look at multiple experiments we have run and compare between them. First we will do what we have done before, but combine the different runs together to examine how often these binding sites appear<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+<p>Each of these experiments have slighly different prefixes, so we will adjust them accordingly with a list. In this instance, we could probably get away with just using “UV” for all 3 repeats. However, for the purposes of this tutorial, we will explicitly define the prefixes.</p>
+<p>We are now ready to proceed to get the binding sequences for each of these repeats.</p>
+<div id="visualizing-multiple-repeats-on-heatmap" class="section level2">
+<h2>Visualizing Multiple Repeats on Heatmap</h2>
+<p>We’ll first start by combining all of the repeats according to the Uniprot canonical sequence so we can viusalize them on a heatmap.</p>
+<pre class="r"><code>bs_output_repeats_uniprot &lt;- data.frame() #initializing dataframe
+num_repeats &lt;- 1:4 #list of repeats 1 through 4
+repeat_names &lt;- paste0(&#39;Repeat0&#39;,num_repeats) #making the names of repeats (e.g. Repeat01, Repeat02, etc.)
+
+for(rname in repeat_names){ #going through each of the repeats
+  shl &lt;- sequence_hit_list[startsWith(names(sequence_hit_list),rname)]
+  enames &lt;- paste0(rname,&#39;_&#39;,c(&#39;UV&#39;,&#39;NoXL&#39;))
+  input_eluate_table &lt;- rbd.makeIETable(shl, enames)
+  filtered_input_eluate_table &lt;- input_eluate_table[input_eluate_table$eluate &gt; 0,]
+  
+  #get binding sequences
+  bs_output_uniprot &lt;- rbd.getBSfromIET(filtered_input_eluate_table,
+                                  fasta_file = fasta_file,
+                                  align_to = &#39;UniProt&#39;,
+                                  protein_to_uniprot_id = protein_dict)
+  
+  bs_output_repeats_uniprot &lt;- rbind(bs_output_repeats_uniprot,data.frame(bs_output_uniprot)) #add data to data.frame
+}</code></pre>
+<p>We can then see the results on a heatmap by using the code we used before:</p>
+<pre class="r"><code>bs_repeats_freqVector &lt;- rbd.freqVector(bs_output = bs_output_repeats_uniprot,
+               name_by = &#39;pro_name&#39;,
+               heatmap = TRUE)</code></pre>
+<pre><code>## Saving 7 x 5 in image</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+</div>
+<div id="visualizing-on-a-pdb-structure" class="section level2">
+<h2>Visualizing on a PDB Structure</h2>
+<p>Before we can visualize the repeats on a structure, we must first align them to a PDB structure. We can use a similar code to what we used before, but replace the <code>align_to</code> variable from “UniProt” to “PDB”.</p>
+<pre class="r"><code>bs_output_repeats_pdb &lt;- data.frame() #initializing dataframe
+num_repeats &lt;- 1:4 #list of repeats 1 through 4
+repeat_names &lt;- paste0(&#39;Repeat0&#39;,num_repeats) #making the names of repeats (e.g. Repeat01, Repeat02, etc.)
+
+for(rname in repeat_names){ #going through each of the repeats
+  shl &lt;- sequence_hit_list[startsWith(names(sequence_hit_list),rname)]
+  enames &lt;- paste0(rname,&#39;_&#39;,c(&#39;UV&#39;,&#39;NoXL&#39;))
+  input_eluate_table &lt;- rbd.makeIETable(shl, enames)
+  filtered_input_eluate_table &lt;- input_eluate_table[input_eluate_table$eluate &gt; 0,]
+  
+  #get binding sequences
+  bs_output_pdb &lt;- rbd.getBSfromIET(filtered_input_eluate_table,
+                                  fasta_file = fasta_file,
+                                  align_to = &#39;PDB&#39;,
+                                  protein_dict = protein_dict)
+  
+  bs_output_repeats_pdb &lt;- rbind(bs_output_repeats_pdb,data.frame(bs_output_pdb)) #add data to data.frame
+}</code></pre>
+<p>Now that we have loaded the data into our R environment and have initialized the data, let’s make a PyMOL file. By default, it will also create a heatmap with the same color scheme as the PyMOL file if <code>heatmap</code> is kept as <code>TRUE</code> whose numbering will correspond to the amino acid number in the chain’s sequence, which may be different than that of the RCSB database. A legend will also be generated to go with the PyMOL file, though it will be similar to the one generated by the heatmap:</p>
+<pre class="r"><code>rbd.pymol(bs_output_repeats_pdb, 
+          color_by = &#39;freq&#39;, 
+          colors = &#39;magma&#39;, 
+          file.name = &#39;pymol_magma_diff_analysis.pml&#39;)</code></pre>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_rbdmap/pymol_magma_diff_analysis3.gif?raw=true" style="width:70.0%" /></p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_rbdmap/freqvector_legend_test2.png?raw=true" style="width:15.0%" /></p>
+</div>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<pre class="r"><code>devtools::session_info()</code></pre>
+<pre><code>## ─ Session info ──────────────────────────────────────────────────────────────────────────────
+##  setting  value                       
+##  version  R version 3.5.1 (2018-07-02)
+##  os       macOS  10.14.3              
+##  system   x86_64, darwin15.6.0        
+##  ui       RStudio                     
+##  language (EN)                        
+##  collate  en_US.UTF-8                 
+##  ctype    en_US.UTF-8                 
+##  tz       Australia/Melbourne         
+##  date     2019-09-10                  
+## 
+## ─ Packages ──────────────────────────────────────────────────────────────────────────────────
+##  package          * version    date       lib source                                   
+##  ade4               1.7-13     2018-08-31 [1] CRAN (R 3.5.0)                           
+##  assertthat         0.2.1      2019-03-21 [1] CRAN (R 3.5.2)                           
+##  backports          1.1.4      2019-04-10 [1] CRAN (R 3.5.2)                           
+##  bio3d            * 2.3-4      2018-04-03 [1] CRAN (R 3.5.0)                           
+##  BiocGenerics     * 0.28.0     2018-10-30 [1] Bioconductor                             
+##  Biostrings       * 2.50.2     2019-01-03 [1] Bioconductor                             
+##  bitops           * 1.0-6      2013-08-17 [1] CRAN (R 3.5.0)                           
+##  callr              3.3.1      2019-07-18 [1] CRAN (R 3.5.2)                           
+##  cli                1.1.0      2019-03-19 [1] CRAN (R 3.5.2)                           
+##  codetools          0.2-16     2018-12-24 [1] CRAN (R 3.5.2)                           
+##  colorspace         1.4-1      2019-03-18 [1] CRAN (R 3.5.2)                           
+##  crayon             1.3.4      2017-09-16 [1] CRAN (R 3.5.0)                           
+##  crisscrosslinker * 0.9        2019-09-03 [1] Github (egmg726/crisscrosslinker@2238988)
+##  curl             * 4.0        2019-07-22 [1] CRAN (R 3.5.2)                           
+##  desc               1.2.0      2018-05-01 [1] CRAN (R 3.5.0)                           
+##  devtools         * 2.1.0      2019-07-06 [1] CRAN (R 3.5.1)                           
+##  digest             0.6.20     2019-07-04 [1] CRAN (R 3.5.2)                           
+##  dplyr              0.8.3      2019-07-04 [1] CRAN (R 3.5.2)                           
+##  evaluate           0.14       2019-05-28 [1] CRAN (R 3.5.2)                           
+##  fs                 1.3.1      2019-05-06 [1] CRAN (R 3.5.2)                           
+##  gdtools          * 0.1.9      2019-06-18 [1] CRAN (R 3.5.2)                           
+##  ggplot2          * 3.2.1      2019-08-10 [1] CRAN (R 3.5.2)                           
+##  glue               1.3.1      2019-03-12 [1] CRAN (R 3.5.2)                           
+##  gridExtra          2.3        2017-09-09 [1] CRAN (R 3.5.0)                           
+##  gtable             0.3.0      2019-03-25 [1] CRAN (R 3.5.2)                           
+##  highr              0.8        2019-03-20 [1] CRAN (R 3.5.2)                           
+##  htmltools          0.3.6      2017-04-28 [1] CRAN (R 3.5.0)                           
+##  httr             * 1.4.1      2019-08-05 [1] CRAN (R 3.5.2)                           
+##  IRanges          * 2.16.0     2018-10-30 [1] Bioconductor                             
+##  jsonlite         * 1.6        2018-12-07 [1] CRAN (R 3.5.0)                           
+##  knitr              1.24       2019-08-08 [1] CRAN (R 3.5.2)                           
+##  labeling           0.3        2014-08-23 [1] CRAN (R 3.5.0)                           
+##  lattice            0.20-38    2018-11-04 [1] CRAN (R 3.5.0)                           
+##  lava               1.6.6      2019-08-01 [1] CRAN (R 3.5.2)                           
+##  lazyeval           0.2.2      2019-03-15 [1] CRAN (R 3.5.2)                           
+##  magrittr           1.5        2014-11-22 [1] CRAN (R 3.5.0)                           
+##  MASS               7.3-51.4   2019-03-31 [1] CRAN (R 3.5.2)                           
+##  Matrix             1.2-17     2019-03-22 [1] CRAN (R 3.5.2)                           
+##  memoise            1.1.0      2017-04-21 [1] CRAN (R 3.5.0)                           
+##  munsell            0.5.0      2018-06-12 [1] CRAN (R 3.5.0)                           
+##  openxlsx         * 4.1.0.1    2019-05-28 [1] CRAN (R 3.5.2)                           
+##  pillar             1.4.2      2019-06-29 [1] CRAN (R 3.5.2)                           
+##  pkgbuild           1.0.5      2019-08-26 [1] CRAN (R 3.5.2)                           
+##  pkgconfig          2.0.2      2018-08-16 [1] CRAN (R 3.5.0)                           
+##  pkgload            1.0.2      2018-10-29 [1] CRAN (R 3.5.0)                           
+##  plyr               1.8.4      2016-06-08 [1] CRAN (R 3.5.0)                           
+##  prettyunits        1.0.2      2015-07-13 [1] CRAN (R 3.5.0)                           
+##  processx           3.4.1      2019-07-18 [1] CRAN (R 3.5.2)                           
+##  prodlim            2018.04.18 2018-04-18 [1] CRAN (R 3.5.0)                           
+##  ps                 1.3.0      2018-12-21 [1] CRAN (R 3.5.0)                           
+##  purrr              0.3.2      2019-03-15 [1] CRAN (R 3.5.2)                           
+##  R6                 2.4.0      2019-02-14 [1] CRAN (R 3.5.2)                           
+##  RColorBrewer     * 1.1-2      2014-12-07 [1] CRAN (R 3.5.0)                           
+##  Rcpp               1.0.2      2019-07-25 [1] CRAN (R 3.5.2)                           
+##  RCurl            * 1.95-4.12  2019-03-04 [1] CRAN (R 3.5.2)                           
+##  remotes            2.1.0      2019-06-24 [1] CRAN (R 3.5.2)                           
+##  reshape2         * 1.4.3      2017-12-11 [1] CRAN (R 3.5.0)                           
+##  rlang              0.4.0      2019-06-25 [1] CRAN (R 3.5.2)                           
+##  rmarkdown          1.15       2019-08-21 [1] CRAN (R 3.5.2)                           
+##  rprojroot          1.3-2      2018-01-03 [1] CRAN (R 3.5.0)                           
+##  rstudioapi         0.10       2019-03-19 [1] CRAN (R 3.5.2)                           
+##  S4Vectors        * 0.20.1     2018-11-09 [1] Bioconductor                             
+##  scales             1.0.0      2018-08-09 [1] CRAN (R 3.5.0)                           
+##  seqinr           * 3.4-5      2017-08-01 [1] CRAN (R 3.5.0)                           
+##  sessioninfo        1.1.1      2018-11-05 [1] CRAN (R 3.5.0)                           
+##  stringi            1.4.3      2019-03-12 [1] CRAN (R 3.5.2)                           
+##  stringr          * 1.4.0      2019-02-10 [1] CRAN (R 3.5.2)                           
+##  survival           2.44-1.1   2019-04-01 [1] CRAN (R 3.5.2)                           
+##  svglite          * 1.2.2      2019-05-17 [1] CRAN (R 3.5.2)                           
+##  testthat           2.2.1      2019-07-25 [1] CRAN (R 3.5.2)                           
+##  tibble             2.1.3      2019-06-06 [1] CRAN (R 3.5.2)                           
+##  tidyselect         0.2.5      2018-10-11 [1] CRAN (R 3.5.0)                           
+##  tufte            * 0.5        2019-05-12 [1] CRAN (R 3.5.2)                           
+##  usethis          * 1.5.1      2019-07-04 [1] CRAN (R 3.5.2)                           
+##  viridis          * 0.5.1      2018-03-29 [1] CRAN (R 3.5.0)                           
+##  viridisLite      * 0.3.0      2018-02-01 [1] CRAN (R 3.5.0)                           
+##  wesanderson      * 0.3.6      2018-04-20 [1] CRAN (R 3.5.0)                           
+##  withr              2.1.2      2018-03-15 [1] CRAN (R 3.5.0)                           
+##  xfun               0.9        2019-08-21 [1] CRAN (R 3.5.2)                           
+##  XML              * 3.98-1.20  2019-06-06 [1] CRAN (R 3.5.2)                           
+##  xml2               1.2.2      2019-08-09 [1] CRAN (R 3.5.2)                           
+##  XVector          * 0.22.0     2018-10-30 [1] Bioconductor                             
+##  yaml               2.2.0      2018-07-25 [1] CRAN (R 3.5.0)                           
+##  zip                2.0.4      2019-09-01 [1] CRAN (R 3.5.2)                           
+##  zlibbioc           1.28.0     2018-10-30 [1] Bioconductor                             
+## 
+## [1] /Library/Frameworks/R.framework/Versions/3.5/Resources/library</code></pre>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Castello, A. et al. Comprehensive Identification of RNA-Binding Domains in Human Cells. Molecular Cell 63, 696-710, <a href="doi:10.1016/j.molcel.2016.06.029" class="uri">doi:10.1016/j.molcel.2016.06.029</a> (2016).</p>
+<p>Tyanova, S., Temu, T. &amp; Cox, J. The MaxQuant computational platform for mass spectrometry-based shotgun proteomics. Nature Protocols 11, 2301-2319, <a href="doi:10.1038/nprot.2016.136" class="uri">doi:10.1038/nprot.2016.136</a> (2016).</p>
+<p>Zhang, Q. et al. RNA exploits an exposed regulatory site to inhibit the enzymatic activity of PRC2. Nature Structural &amp; Molecular Biology, <a href="doi:10.1038/s41594-019-0197-y" class="uri">doi:10.1038/s41594-019-0197-y</a> (2019).</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The data for this tutorial is available <a href="https://doi.org/10.26180/5c3d9751c64ae">here</a>.The relevant files are located within the .zip files for each repeat as MaxQuant_txt_folder_output/peptides.txt. For simplicity, all “peptides.txt” files have been re-named according to their experiment numbers as part of the external data available in <code>crisscrosslinkeR</code>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>These variables correspond to the <code>ggplot2</code> input variables that is used to generate this plot.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Since slightly different but overlapping peptides may show up due to the use of different proteases, the frequency is measured by the amino acid rather than the full peptide.<a href="#fnref3" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

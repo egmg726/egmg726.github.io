@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Emma Gail" />
+
+<meta name="date" content="2019-09-10" />
+
+<title>Visualizing and Analyzing RNA-binding Domains in PRKDC from Original RBDmap Dataset</title>
+
+<script src="libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap/shim/respond.min.js"></script>
+<script src="libs/navigation/tabsets.js"></script>
+<link href="libs/highlightjs/default.css" rel="stylesheet" />
+<script src="libs/highlightjs/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Visualizing and Analyzing RNA-binding Domains in PRKDC from Original RBDmap Dataset</h1>
+<h4 class="author">Emma Gail</h4>
+<h4 class="date">2019-09-10</h4>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This tutorial will show you how to perform the basic functions of RBDmap analysis, using the original data from the RBDmap paper<sup><a href="https://doi.org/10.1016/j.molcel.2016.06.029">1</a></sup>.</p>
+<p>RBDmap is a technique that involves UV crosslinking followed by RNA purification with tandem proteolytic digesting and LC-MS/MS to detect peptides adjacent to the crosslinking site. Since the adjacent peptide is what is detected by software such as MaxQuant<sup>2</sup>, approaches in bioinformatics are required to find the RNA-binding domain.</p>
+<p>The <code>crisscrosslinker</code> package was developed for both protein-protein and protein-RNA data. This tutorial will focus on data derived from RBDmap-style experiments.</p>
+</div>
+<div id="install-crisscrosslinker" class="section level1">
+<h1>Install <code>crisscrosslinkeR</code></h1>
+<p>If you have not done so already, please install <code>crisscrosslinkeR</code>:</p>
+<pre class="r"><code>library(devtools)
+install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
+</div>
+<div id="load-libraries" class="section level1">
+<h1>Load Libraries</h1>
+<p>Load the <code>crisscrosslinker</code> package into your R session along with its dependencies.</p>
+<pre class="r"><code>library(XML)
+library(RCurl)
+library(ggplot2)
+library(bio3d)
+library(Biostrings)
+library(seqinr)
+library(RColorBrewer)
+library(openxlsx)
+library(viridis)
+library(stringr)
+library(svglite)
+library(crisscrosslinker)</code></pre>
+<div id="load-data" class="section level2">
+<h2>Load Data</h2>
+<p>For this tutorial, we will use a subset of data that was generated for the original RBDmap paper. The original data can be found <a href="https://www.huber.embl.de/users/befische/RBDmap/">here</a>.</p>
+<p>Once the library has been loaded, this data can be found as a table under the name <code>rbdmapData</code>.</p>
+<pre class="r"><code>rbdmapData &lt;- read.table(system.file(&quot;extdata/RBDmap&quot;,&#39;data.txt&#39;,package = &#39;crisscrosslinker&#39;,mustWork = TRUE),sep=&#39;\t&#39;,header = TRUE)
+head(rbdmapData)</code></pre>
+<pre><code>##              ENSG ProtID  Symbol category Uniqueness     domain enzyme
+## 1 ENSG00000138758 Q9NVA2  SEPT11   RBDpep UniqueGene unknownRBD   LysC
+## 2 ENSG00000116001 P31483    TIA1   RBDpep UniqueGene   knownRBD   LysC
+## 3 ENSG00000007080 Q96CT7 CCDC124   RBDpep UniqueGene unknownRBD   LysC
+## 4 ENSG00000149187 G5EA30   CELF1   RBDpep UniqueGene   knownRBD   LysC
+## 5 ENSG00000145920 Q6PUV4   CPLX2   RBDpep UniqueGene unknownRBD   LysC
+## 6 ENSG00000124228 Q96GQ7   DDX27   RBDpep UniqueGene   knownRBD   LysC
+##                                                  proteolyticFragment
+## 1                                              KKAAAQLLQSQAQQSGAQQTK
+## 2                                                   AAFAPFGRISDARVVK
+## 3 AKSHLEVPLEENVNRRVLEEGSVEARTIEDAIAVLSVAEEAADRHPERRMRAAFTAFEEAQLPRLK
+## 4                                                      AALEAQNALHNMK
+## 5                                                    AALEQPCEGSLTRPK
+## 6           SQEAALRAAPDILIATPGRLIDHLHNCPSFHLSSIEVLILDEADRMLDEYFEEQMK
+##   fragmentStart fragmentStop      trypticPeptide
+## 1           398          418 AAAQLLQSQAQQSGAQQTK
+## 2           124          139            AAFAPFGR
+## 3           120          185       AAFTAFEEAQLPR
+## 4            98          110       AALEAQNALHNMK
+## 5            84           98     AALEQPCEGSLTRPK
+## 6           331          386        AAPDILIATPGR</code></pre>
+<p>The main columns we will use for this tutorial will be:</p>
+<ul>
+<li><code>protID</code> A unique identifier for the protein sequence used (does not necessarily have to be a UniProt ID). For the <code>crisscrosslinker</code> package, it can also be an identifier from a FASTA file that will be used later in the tutorial.</li>
+<li><code>trypticPeptide</code> This is the peptide detected by a software such as MaxQuant from the protein identified in the <code>protID</code> column.</li>
+<li><code>enzyme</code> The enzyme used for the experiment. At this time, “ArgC” and “LysC” are the 2 enzymes that are supported by crisscrosslinker. If you would like to suggest an additional protease used by your lab, please let me know.</li>
+</ul>
+<p>We will use this information to determine:</p>
+<ul>
+<li><code>proteolyticFragment</code> The fragment containing the tryptic peptide as well as the RNA-binding domain.</li>
+</ul>
+<p>In order to directly compare the the proteolytic fragments, the same parameters will be used for the analysis done in this tutorial.</p>
+<p>From <a href="https://media.nature.com/original/nature-assets/nprot/journal/v12/n12/extref/nprot.2017.106-S1.pdf">the manual</a>:</p>
+<blockquote>
+<p>The cleavage patterns of the proteolytic enzymes are defined by a regular expression specifying exatcly three amino acid positions before and three after the cleavage site.</p>
+</blockquote>
+<p>There is also a <code>cleaveOffset</code> defined as 4 within the R script of the RBDmap R package. We will use these settings for our example gene to show that this program can find the same RNA-binding domains as stated in the original RBDmap paper.</p>
+</div>
+</div>
+<div id="example-in-practice-prkdc" class="section level1">
+<h1>Example in Practice: PRKDC</h1>
+<p>Since we want to look at other features of the <code>crisscrosslinkeR</code> package such as creating a PyMOL script to visualize the RBDs, we will look at only one gene: PRKDC. PRKDC is a protein kinase with a fairly complete structure and a large number of tryptic peptides within the RBDmap dataset and so is a good choice for highlighting these additional features.</p>
+<div id="filter-data" class="section level2">
+<h2>Filter Data</h2>
+<p>We will first filter our data so that only the tryptic peptides found in the PRKDC protein will be used for this example.</p>
+<pre class="r"><code>uniprot.id &lt;- &#39;P78527&#39;
+
+rbdmapPRKDC &lt;- na.omit(rbdmapData[rbdmapData$ProtID == uniprot.id,])
+nrow(rbdmapPRKDC)</code></pre>
+<pre><code>## [1] 62</code></pre>
+<p>There are 62 tryptic peptides that were detected by RBDmap. However, we want to filter this dataset even further to only the essential columns.</p>
+<pre class="r"><code>rbdmapPRKDC.2 &lt;- rbdmapPRKDC[,c(&#39;ProtID&#39;,&#39;enzyme&#39;,&#39;trypticPeptide&#39;)]
+head(rbdmapPRKDC.2)</code></pre>
+<pre><code>##      ProtID enzyme trypticPeptide
+## 1747 P78527   LysC      DFGLLVFVR
+## 2096 P78527   LysC   HECMAPLTALVK
+## 2270 P78527   LysC     LQETLSAADR
+## 2332 P78527   LysC  NCISTVVHQGLIR
+## 3346 P78527   ArgC NLSSNEAISLEEIR
+## 3381 P78527   ArgC        QKICYAK</code></pre>
+<p>These three columns are all that you need to run the following functions.</p>
+</div>
+<div id="get-binding-sequences" class="section level2">
+<h2>Get Binding Sequences</h2>
+<p>The function <code>rbd.getBSfromDF</code> will be used to get the proteolytic fragments.</p>
+<p>One of the benefits of the crisscrosslinker package is that large databases containing the sequences of your proteins of interest are not needed. All of this data can be automatically fetched from the UniProt website as long as you have a reliable internet connection.</p>
+<p>However, we know this is not always the case. In the case of a protein with a sequence slightly different to that of a UniProt canonical sequence. In this case, you will need the FASTA file that was used to align the tryptic peptides, making sure that the names of the <code>protID</code> match those within the FASTA file.</p>
+<p>In this case, we are only focused on 1 protein sequence and do not want to fetch the same protein sequence 62 times from UniProt.</p>
+<p>We can easily retrieve and save the UniProt FASTA sequence from R using the function <code>uniprot.fasta</code> and set <code>download_fasta</code> to <code>TRUE</code>. If you have multiple proteins that you are matching your data against, make sure that these sequences are within the same FASTA file.</p>
+<pre class="r"><code>uniprot.fasta(uniprot.id, download.fasta = TRUE)
+fasta &lt;- seqinr::read.fasta(paste0(uniprot.id,&#39;.fasta&#39;))</code></pre>
+<p>We will then use this FASTA file to be able to match the RNA-bound fragments based on the sequence and the data from the RBDmap experiment.</p>
+<pre class="r"><code>rbdmapPRKDC.bs &lt;- rbd.getBSfromDF(rbdmapPRKDC.2,fasta = fasta, cleave_offset = 4)
+table(as.character(rbdmapPRKDC$proteolyticFragment) == as.character(rbdmapPRKDC.bs$proteolyticFragment))</code></pre>
+<pre><code>## 
+## TRUE 
+##   62</code></pre>
+<p>Since there are no FALSE statements, all 62 of the proteolytic fragments match each other between those published by Castello et. al and those determined by <code>crisscrosslinker</code>.</p>
+<pre class="r"><code>head(rbdmapPRKDC.bs)</code></pre>
+<pre><code>##      ProtID enzyme trypticPeptide
+## 1747 P78527   LysC      DFGLLVFVR
+## 2096 P78527   LysC   HECMAPLTALVK
+## 2270 P78527   LysC     LQETLSAADR
+## 2332 P78527   LysC  NCISTVVHQGLIR
+## 3346 P78527   ArgC NLSSNEAISLEEIR
+## 3381 P78527   ArgC        QKICYAK
+##                                                                                proteolyticFragment
+## 1747                       MAGSGAGVRCSLLRLQETLSAADRCGAALAGHQLIRGLGQECVLSSSPAVLALQTSLVFSRDFGLLVFVRK
+## 2096 EAREAANGDSDGPSYMSSLSYLADSTLSEEMSQFDFSTGVQSYSYSSQDPRPATGRFRRREQRDPTVHDDVLELEMDELNRHECMAPLTALVK
+## 2270                       MAGSGAGVRCSLLRLQETLSAADRCGAALAGHQLIRGLGQECVLSSSPAVLALQTSLVFSRDFGLLVFVRK
+## 2332                                                                        GPVLRNCISTVVHQGLIRICSK
+## 3346                                                              AAQKGFNKVVLKHLKKTKNLSSNEAISLEEIR
+## 3381                                                                                      QKICYAKR
+##      fragmentStart fragmentStop
+## 1747             1           71
+## 2096          2010         2102
+## 2270             1           71
+## 2332           472          493
+## 3346           821          852
+## 3381          4042         4049</code></pre>
+</div>
+<div id="matching-the-sequences-to-uniprotpdb-using-blast-optional" class="section level2">
+<h2>Matching the Sequences to UniProt/PDB using BLAST (Optional)</h2>
+<p>In order to utilize the other features of <code>crisscrosslinker</code>, we have to match the sequences to known UniProt and PDB identifiers. For this example, all of the proteolytic peptides have already been linked to a UniProt identifier. However, if we did not know this, we could BLAST the sequence from the FASTA file through the Swissprot database.</p>
+<pre class="r"><code>sequence &lt;- fasta[[1]]
+uniprot.id &lt;- blast.menu(sequence,database=&#39;swissprot&#39;)$pdb.id
+uniprotSeq &lt;- uniprot.fasta(uniprot.id, download_fasta = TRUE)</code></pre>
+<p>For the PyMOL functions, we will have to know the PDB ID to match the sequence against. If you have not already selected the PDB ID to use, you can use the <code>blast.menu</code> function as you did for selecting a UniProt ID using the <code>pdb</code> database instead.</p>
+<pre class="r"><code>pdb.info &lt;- blast.menu(sequence,database=&#39;pdb&#39;)
+pdb.id &lt;- pdb.info$pdb_id
+chain &lt;- pdb.info$chain</code></pre>
+</div>
+<div id="matching-the-sequences-to-uniprotpdb-using-identifiers-optional" class="section level2">
+<h2>Matching the Sequences to UniProt/PDB using Identifiers (Optional)</h2>
+<p>However, using BLAST for many searches may not be the most efficient option if you already have a UniProt/PDB ID and want to get the other. If you already have a UniProt ID, you can find PDBs that have curated by the site.</p>
+<pre class="r"><code>uniprot.info &lt;- bio3d::uniprot(uniprot.id)
+uniprot.info$dbref[uniprot.info$dbref$type == &#39;PDB&#39;,]</code></pre>
+<pre><code>##    type   id
+## 18  PDB 5LUQ
+## 19  PDB 5W1R
+## 20  PDB 5Y3R</code></pre>
+<p>You can use this information to find the chain(s) associated with your Uniprot ID.</p>
+<p>Similarily, many chains on PDB structures have corresponding UniProt IDs. If you already have the ID and chain, you can see if there is a known UniProt ID attached by using the <code>bio3d</code> function <code>pdb.annotate</code>.</p>
+<pre class="r"><code>pdb.id &lt;- &#39;5W1R&#39;
+chain &lt;- &#39;A&#39;
+pdb.anno &lt;- bio3d::pdb.annotate(pdb.id)
+pdb.anno[paste0(pdb.id,&#39;_&#39;,chain),c(&#39;db_name&#39;,&#39;db_id&#39;)]</code></pre>
+<pre><code>##        db_name  db_id
+## 5W1R_A UniProt P78527</code></pre>
+<p>If you do not have the chain already, you can also use <code>pdb.annotate</code> to find all of the chains associated with your UniProt ID.</p>
+</div>
+<div id="aligning-the-sequence-to-uniprotpdb-sequences" class="section level2">
+<h2>Aligning the Sequence to UniProt/PDB Sequences</h2>
+<p>In this case, we have already selected the PDB structure <a href="https://dx.doi.org/10.2210/pdb5W1R/pdb">5W1R</a>, which covers most of the protein sequence on a single chain. We will add all 3 of the identifiers to a <code>data.frame</code> that we will use for alignment.</p>
+<pre class="r"><code>alignIDs &lt;- data.frame(protID=&#39;P78527&#39;,uniprotID=&#39;P78527&#39;,pdbID=&#39;5W1R_A&#39;)</code></pre>
+<p>In this case, the <code>protID</code> and <code>uniprotID</code> are the same. However, this is not always the case and should be made explicit for the functions to work correctly.</p>
+<p>Since the proteins have already been aligned to the UniProt sequence, we will align only to the chosen PDB structure.</p>
+<pre class="r"><code>bs.output &lt;- rbd.alignBS(rbdmapPRKDC.bs,alignIDs,alignTo=&#39;pdb&#39;,uniprot2pdb=TRUE)</code></pre>
+<p>The <code>uniprot2pdb</code> selector has been set to <code>TRUE</code> to increase the accuracy of the alignment. When this is selected, it will use RCSB PDB mapping information to select the start and end points. This should be selected when:</p>
+<ul>
+<li>The difference between the UniProt sequence and the protein sequence used in the experiment are very similar or are the same.</li>
+<li>There are many gaps in the PDB chain selected which may make a pairwise alignment difficult or inaccurate.</li>
+</ul>
+<pre class="r"><code>table(bs.output$db)</code></pre>
+<pre><code>## 
+##     PDB UniProt 
+##      46      16</code></pre>
+<p>Of our 62 proteolytic fragments, 46 of them were able to be mapped to our selected PDB structure. We can visualize these fragments by generating a PyMol file as well as a heatmap.</p>
+<pre class="r"><code>rbd.pymol(bs.output, color_by = &#39;freq&#39;,
+          colors = &#39;Blues&#39;, file.name = &#39;rbd.PRKDC.blues.pml&#39;, 
+          heatmap = TRUE)</code></pre>
+<p><img src="rbdmap_prkdc_workflow_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre><code>##   HEADER    DNA BINDING PROTEIN                     04-JUN-17   5W1R</code></pre>
+<p>While this heatmap corresponds to the amino acids within the PDB chain sequence, it is recommended to use this visualization for your other sequences as well, including UniProt and FASTA.</p>
+<p>The .pml file can be opened in the program <a href="https://pymol.org">PyMOL</a>. It will automatically color the structure by the frequency of the binding sequences (including those which are not identical but still overlap on the sequence).</p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prkdc_combo/rbd.PRKDC.blues2.gif?raw=true" />}</p>
+<p>For more options showing the range of <code>rbd.pymol</code>, see <a href="https://egmg726.github.io/crisscrosslinker/nsmb_pipeline_rbdmap.html">this workflow</a>.</p>
+</div>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<pre class="r"><code>devtools::session_info()</code></pre>
+<pre><code>## ─ Session info ──────────────────────────────────────────────────────────
+##  setting  value                       
+##  version  R version 3.5.1 (2018-07-02)
+##  os       macOS  10.14.3              
+##  system   x86_64, darwin15.6.0        
+##  ui       RStudio                     
+##  language (EN)                        
+##  collate  en_US.UTF-8                 
+##  ctype    en_US.UTF-8                 
+##  tz       Australia/Melbourne         
+##  date     2019-09-10                  
+## 
+## ─ Packages ──────────────────────────────────────────────────────────────
+##  package          * version    date       lib
+##  ade4               1.7-13     2018-08-31 [1]
+##  assertthat         0.2.1      2019-03-21 [1]
+##  backports          1.1.4      2019-04-10 [1]
+##  bio3d            * 2.3-4      2018-04-03 [1]
+##  BiocGenerics     * 0.28.0     2018-10-30 [1]
+##  Biostrings       * 2.50.2     2019-01-03 [1]
+##  bitops           * 1.0-6      2013-08-17 [1]
+##  callr              3.3.1      2019-07-18 [1]
+##  cli                1.1.0      2019-03-19 [1]
+##  codetools          0.2-16     2018-12-24 [1]
+##  colorspace         1.4-1      2019-03-18 [1]
+##  crayon             1.3.4      2017-09-16 [1]
+##  crisscrosslinker * 0.9        2019-09-03 [1]
+##  curl             * 4.0        2019-07-22 [1]
+##  desc               1.2.0      2018-05-01 [1]
+##  devtools         * 2.1.0      2019-07-06 [1]
+##  digest             0.6.20     2019-07-04 [1]
+##  dplyr              0.8.3      2019-07-04 [1]
+##  evaluate           0.14       2019-05-28 [1]
+##  fs                 1.3.1      2019-05-06 [1]
+##  gdtools          * 0.1.9      2019-06-18 [1]
+##  ggplot2          * 3.2.1      2019-08-10 [1]
+##  glue               1.3.1      2019-03-12 [1]
+##  gridExtra          2.3        2017-09-09 [1]
+##  gtable             0.3.0      2019-03-25 [1]
+##  highr              0.8        2019-03-20 [1]
+##  htmltools          0.3.6      2017-04-28 [1]
+##  httr             * 1.4.1      2019-08-05 [1]
+##  IRanges          * 2.16.0     2018-10-30 [1]
+##  jsonlite         * 1.6        2018-12-07 [1]
+##  knitr              1.24       2019-08-08 [1]
+##  labeling           0.3        2014-08-23 [1]
+##  lattice            0.20-38    2018-11-04 [1]
+##  lava               1.6.6      2019-08-01 [1]
+##  lazyeval           0.2.2      2019-03-15 [1]
+##  magrittr           1.5        2014-11-22 [1]
+##  MASS               7.3-51.4   2019-03-31 [1]
+##  Matrix             1.2-17     2019-03-22 [1]
+##  memoise            1.1.0      2017-04-21 [1]
+##  munsell            0.5.0      2018-06-12 [1]
+##  openxlsx         * 4.1.0.1    2019-05-28 [1]
+##  pillar             1.4.2      2019-06-29 [1]
+##  pkgbuild           1.0.5      2019-08-26 [1]
+##  pkgconfig          2.0.2      2018-08-16 [1]
+##  pkgload            1.0.2      2018-10-29 [1]
+##  plyr               1.8.4      2016-06-08 [1]
+##  prettyunits        1.0.2      2015-07-13 [1]
+##  processx           3.4.1      2019-07-18 [1]
+##  prodlim            2018.04.18 2018-04-18 [1]
+##  ps                 1.3.0      2018-12-21 [1]
+##  purrr              0.3.2      2019-03-15 [1]
+##  R6                 2.4.0      2019-02-14 [1]
+##  RColorBrewer     * 1.1-2      2014-12-07 [1]
+##  Rcpp               1.0.2      2019-07-25 [1]
+##  RCurl            * 1.95-4.12  2019-03-04 [1]
+##  remotes            2.1.0      2019-06-24 [1]
+##  reshape2         * 1.4.3      2017-12-11 [1]
+##  rlang              0.4.0      2019-06-25 [1]
+##  rmarkdown          1.15       2019-08-21 [1]
+##  rprojroot          1.3-2      2018-01-03 [1]
+##  rstudioapi         0.10       2019-03-19 [1]
+##  S4Vectors        * 0.20.1     2018-11-09 [1]
+##  scales             1.0.0      2018-08-09 [1]
+##  seqinr           * 3.4-5      2017-08-01 [1]
+##  sessioninfo        1.1.1      2018-11-05 [1]
+##  stringi            1.4.3      2019-03-12 [1]
+##  stringr          * 1.4.0      2019-02-10 [1]
+##  survival           2.44-1.1   2019-04-01 [1]
+##  svglite          * 1.2.2      2019-05-17 [1]
+##  testthat           2.2.1      2019-07-25 [1]
+##  tibble             2.1.3      2019-06-06 [1]
+##  tidyselect         0.2.5      2018-10-11 [1]
+##  tufte            * 0.5        2019-05-12 [1]
+##  usethis          * 1.5.1      2019-07-04 [1]
+##  viridis          * 0.5.1      2018-03-29 [1]
+##  viridisLite      * 0.3.0      2018-02-01 [1]
+##  wesanderson      * 0.3.6      2018-04-20 [1]
+##  withr              2.1.2      2018-03-15 [1]
+##  xfun               0.9        2019-08-21 [1]
+##  XML              * 3.98-1.20  2019-06-06 [1]
+##  xml2               1.2.2      2019-08-09 [1]
+##  XVector          * 0.22.0     2018-10-30 [1]
+##  yaml               2.2.0      2018-07-25 [1]
+##  zip                2.0.4      2019-09-01 [1]
+##  zlibbioc           1.28.0     2018-10-30 [1]
+##  source                                   
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  Bioconductor                             
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  Github (egmg726/crisscrosslinker@2238988)
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.1)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+##  CRAN (R 3.5.0)                           
+##  CRAN (R 3.5.2)                           
+##  Bioconductor                             
+## 
+## [1] /Library/Frameworks/R.framework/Versions/3.5/Resources/library</code></pre>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ol style="list-style-type: decimal">
+<li><p>Castello, A. et al. Comprehensive Identification of RNA-Binding Domains in Human Cells. Molecular Cell 63, 696-710, <a href="doi:10.1016/j.molcel.2016.06.029" class="uri">doi:10.1016/j.molcel.2016.06.029</a> (2016).</p></li>
+<li><p>Tyanova, S., Temu, T. &amp; Cox, J. The MaxQuant computational platform for mass spectrometry-based shotgun proteomics. Nature Protocols 11, 2301-2319, <a href="doi:10.1038/nprot.2016.136" class="uri">doi:10.1038/nprot.2016.136</a> (2016).</p></li>
+</ol>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
