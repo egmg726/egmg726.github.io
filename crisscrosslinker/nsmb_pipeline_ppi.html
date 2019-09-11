@@ -467,7 +467,7 @@ xlms.files</code></pre>
 ## [7] &quot;PRC2-AEBP2_7.csv&quot;</code></pre>
 <p>As you can see, there is a mix of .xlsx and .csv files. However, this is not an issue for the <code>ppi.loadData</code>.</p>
 <p>From this point on, most of the functions we will use will have the prefix <code>ppi</code>. This stands for protein-protein interaction and is used to distinguish these functions from the protein-RNA interaction functions in <code>crisscrosslinkeR</code> which use the prefix <code>rbd</code> for RNA-binding domain.</p>
-<pre class="r"><code>#current error with loading csv files
+<pre class="r"><code>
 xlms.data &lt;- ppi.loadData(xlms.files,fasta,file_directory = sys.dir)</code></pre>
 <pre><code>## Loaded as readline
 ## Loaded as readline</code></pre>
