@@ -12,19 +12,19 @@
 
 <meta name="author" content="Emma Gail" />
 
-<meta name="date" content="2019-09-10" />
+<meta name="date" content="2019-09-13" />
 
 <title>Benchmarking: Protein-protein interactions of RNA polymerase II–TFIIF complex (Chen et. al 2009)</title>
 
-<script src="libs/jquery/jquery.min.js"></script>
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-<script src="libs/bootstrap/js/bootstrap.min.js"></script>
-<script src="libs/bootstrap/shim/html5shiv.min.js"></script>
-<script src="libs/bootstrap/shim/respond.min.js"></script>
-<script src="libs/navigation/tabsets.js"></script>
-<link href="libs/highlightjs/default.css" rel="stylesheet" />
-<script src="libs/highlightjs/highlight.js"></script>
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -180,7 +180,7 @@ summary {
 
 <h1 class="title toc-ignore">Benchmarking: Protein-protein interactions of RNA polymerase II–TFIIF complex (Chen et. al 2009)</h1>
 <h4 class="author">Emma Gail</h4>
-<h4 class="date">2019-09-10</h4>
+<h4 class="date">2019-09-13</h4>
 
 </div>
 
@@ -204,20 +204,10 @@ install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
 <div id="load-libraries" class="section level1">
 <h1>Load Libraries</h1>
 <p>First, load the <code>crisscrosslinker</code> package into your R session.</p>
-<pre class="r"><code>library(XML)
-library(RCurl)
-library(ggplot2)
-library(bio3d)
+<pre class="r"><code>library(crisscrosslinker)
 library(Biostrings)
-library(seqinr)
-library(RColorBrewer)
-library(openxlsx)
-library(viridis)
-library(stringr)
-library(svglite)
-library(jsonlite)
-library(crisscrosslinker)
-library(httr)
+library(XML)
+library(ggplot2)
 library(reshape2)</code></pre>
 </div>
 <div id="download-data-from-pride-optional" class="section level1">
@@ -366,14 +356,14 @@ dist.hist.df.mega &lt;- ppi.distAnalysis(xlink.df.pdb = xlink.df.pdb, plot=FALSE
 <pre><code>##   Note: Accessing on-line PDB file
 ##   HEADER    TRANSCRIPTION                           17-NOV-04   1WCM</code></pre>
 <p><code>dist.hist.df.mega</code> is a <code>list</code> containing a <code>data.frame</code> for each PDB file that was matched to the sequences chosen.</p>
-<p>We can then use an outside color palette that we want to use for our histogram. In this case, we will test out a color palette from the <code>wesanderson</code> library.</p>
+<p>We can then use another color palette that we want to use for our histogram.</p>
 <p>Since we only have one PDB structure, 1WCM, we can just select it from the list to use.</p>
 <pre class="r"><code>library(wesanderson)
 
 ggplot(melt(dist.hist.df.mega[[&#39;1WCM&#39;]]), aes(value, fill = variable)) +
   geom_histogram(position = &quot;dodge&quot;) +
   labs(x=expression(paste(&#39;Distance (&#39;,ring(A),&#39;)&#39;)),y=&#39;Frequency&#39;,title=&#39;Distance Analysis for 1WCM&#39;) +
-  scale_fill_manual(values=wes_palette(n=2, name=&quot;GrandBudapest2&quot;)) +
+  scale_fill_manual(values=c(&quot;steelblue&quot;,&quot;forestgreen&quot;) )+
   theme_classic() + theme(legend.title = element_blank())</code></pre>
 <p><img src="yeast_ppi_workflow_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>Note: the control distribution will look slightly different each time it is run due to the random sampling of the lysines unless <code>set.seed</code> is set before <code>ppi.distAnalysis</code>.</p>
@@ -430,31 +420,30 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  version  R version 3.5.1 (2018-07-02)
 ##  os       macOS  10.14.3              
 ##  system   x86_64, darwin15.6.0        
-##  ui       RStudio                     
+##  ui       X11                         
 ##  language (EN)                        
 ##  collate  en_US.UTF-8                 
 ##  ctype    en_US.UTF-8                 
 ##  tz       Australia/Melbourne         
-##  date     2019-09-10                  
+##  date     2019-09-13                  
 ## 
 ## ─ Packages ──────────────────────────────────────────────────────────────
 ##  package          * version    date       lib
 ##  ade4               1.7-13     2018-08-31 [1]
 ##  assertthat         0.2.1      2019-03-21 [1]
 ##  backports          1.1.4      2019-04-10 [1]
-##  bio3d            * 2.3-4      2018-04-03 [1]
+##  bio3d              2.3-4      2018-04-03 [1]
 ##  BiocGenerics     * 0.28.0     2018-10-30 [1]
 ##  Biostrings       * 2.50.2     2019-01-03 [1]
-##  bitops           * 1.0-6      2013-08-17 [1]
+##  bitops             1.0-6      2013-08-17 [1]
 ##  callr              3.3.1      2019-07-18 [1]
 ##  cli                1.1.0      2019-03-19 [1]
-##  codetools          0.2-16     2018-12-24 [1]
 ##  colorspace         1.4-1      2019-03-18 [1]
 ##  crayon             1.3.4      2017-09-16 [1]
 ##  crisscrosslinker * 0.9        2019-09-03 [1]
-##  curl             * 4.0        2019-07-22 [1]
+##  curl               4.0        2019-07-22 [1]
 ##  desc               1.2.0      2018-05-01 [1]
-##  devtools         * 2.1.0      2019-07-06 [1]
+##  devtools           2.1.0      2019-07-06 [1]
 ##  digest             0.6.20     2019-07-04 [1]
 ##  dplyr              0.8.3      2019-07-04 [1]
 ##  evaluate           0.14       2019-05-28 [1]
@@ -464,11 +453,10 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  glue               1.3.1      2019-03-12 [1]
 ##  gridExtra          2.3        2017-09-09 [1]
 ##  gtable             0.3.0      2019-03-25 [1]
-##  highr              0.8        2019-03-20 [1]
 ##  htmltools          0.3.6      2017-04-28 [1]
-##  httr             * 1.4.1      2019-08-05 [1]
+##  httr               1.4.1      2019-08-05 [1]
 ##  IRanges          * 2.16.0     2018-10-30 [1]
-##  jsonlite         * 1.6        2018-12-07 [1]
+##  jsonlite           1.6        2018-12-07 [1]
 ##  knitr              1.24       2019-08-08 [1]
 ##  labeling           0.3        2014-08-23 [1]
 ##  lattice            0.20-38    2018-11-04 [1]
@@ -479,7 +467,7 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  Matrix             1.2-17     2019-03-22 [1]
 ##  memoise            1.1.0      2017-04-21 [1]
 ##  munsell            0.5.0      2018-06-12 [1]
-##  openxlsx         * 4.1.0.1    2019-05-28 [1]
+##  openxlsx           4.1.0.1    2019-05-28 [1]
 ##  pillar             1.4.2      2019-06-29 [1]
 ##  pkgbuild           1.0.5      2019-08-26 [1]
 ##  pkgconfig          2.0.2      2018-08-16 [1]
@@ -491,30 +479,28 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  ps                 1.3.0      2018-12-21 [1]
 ##  purrr              0.3.2      2019-03-15 [1]
 ##  R6                 2.4.0      2019-02-14 [1]
-##  RColorBrewer     * 1.1-2      2014-12-07 [1]
+##  RColorBrewer       1.1-2      2014-12-07 [1]
 ##  Rcpp               1.0.2      2019-07-25 [1]
-##  RCurl            * 1.95-4.12  2019-03-04 [1]
+##  RCurl              1.95-4.12  2019-03-04 [1]
 ##  remotes            2.1.0      2019-06-24 [1]
 ##  reshape2         * 1.4.3      2017-12-11 [1]
 ##  rlang              0.4.0      2019-06-25 [1]
 ##  rmarkdown          1.15       2019-08-21 [1]
 ##  rprojroot          1.3-2      2018-01-03 [1]
-##  rstudioapi         0.10       2019-03-19 [1]
 ##  S4Vectors        * 0.20.1     2018-11-09 [1]
 ##  scales             1.0.0      2018-08-09 [1]
-##  seqinr           * 3.4-5      2017-08-01 [1]
+##  seqinr             3.4-5      2017-08-01 [1]
 ##  sessioninfo        1.1.1      2018-11-05 [1]
 ##  stringi            1.4.3      2019-03-12 [1]
-##  stringr          * 1.4.0      2019-02-10 [1]
+##  stringr            1.4.0      2019-02-10 [1]
 ##  survival           2.44-1.1   2019-04-01 [1]
-##  svglite          * 1.2.2      2019-05-17 [1]
+##  svglite            1.2.2      2019-05-17 [1]
 ##  testthat           2.2.1      2019-07-25 [1]
 ##  tibble             2.1.3      2019-06-06 [1]
 ##  tidyselect         0.2.5      2018-10-11 [1]
-##  tufte            * 0.5        2019-05-12 [1]
-##  usethis          * 1.5.1      2019-07-04 [1]
-##  viridis          * 0.5.1      2018-03-29 [1]
-##  viridisLite      * 0.3.0      2018-02-01 [1]
+##  usethis            1.5.1      2019-07-04 [1]
+##  viridis            0.5.1      2018-03-29 [1]
+##  viridisLite        0.3.0      2018-02-01 [1]
 ##  wesanderson      * 0.3.6      2018-04-20 [1]
 ##  withr              2.1.2      2018-03-15 [1]
 ##  xfun               0.9        2019-08-21 [1]
@@ -535,7 +521,6 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.2)                           
-##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
 ##  Github (egmg726/crisscrosslinker@2238988)
 ##  CRAN (R 3.5.2)                           
@@ -550,7 +535,6 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
 ##  CRAN (R 3.5.2)                           
-##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
 ##  CRAN (R 3.5.2)                           
 ##  Bioconductor                             
@@ -585,7 +569,6 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
-##  CRAN (R 3.5.2)                           
 ##  Bioconductor                             
 ##  CRAN (R 3.5.0)                           
 ##  CRAN (R 3.5.0)                           
@@ -597,7 +580,6 @@ head(xlink.df.pdb[c(&#39;freq_color&#39;,&#39;dist&#39;)])</code></pre>
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
-##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.2)                           
 ##  CRAN (R 3.5.0)                           
 ##  CRAN (R 3.5.0)                           
