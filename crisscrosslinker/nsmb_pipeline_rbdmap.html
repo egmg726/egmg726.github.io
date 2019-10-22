@@ -12,7 +12,7 @@
 
 <meta name="author" content="Emma Gail" />
 
-<meta name="date" content="2019-09-10" />
+<meta name="date" content="2019-10-22" />
 
 <title>Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</title>
 
@@ -180,7 +180,7 @@ summary {
 
 <h1 class="title toc-ignore">Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</h1>
 <h4 class="author">Emma Gail</h4>
-<h4 class="date">2019-09-10</h4>
+<h4 class="date">2019-10-22</h4>
 
 </div>
 
@@ -195,9 +195,10 @@ summary {
 <div id="install-crisscrosslinker" class="section level2">
 <h2>Install <code>crisscrosslinkeR</code></h2>
 <p>If you have not done so already, please install <code>crisscrosslinkeR</code>:</p>
-<pre class="r"><code>library(devtools)
-install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
-<pre><code>## Skipping install of &#39;crisscrosslinker&#39; from a github remote, the SHA1 (2238988c) has not changed since last install.
+<pre class="r"><code>library(devtools)</code></pre>
+<pre><code>## Loading required package: usethis</code></pre>
+<pre class="r"><code>install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
+<pre><code>## Skipping install of &#39;crisscrosslinker&#39; from a github remote, the SHA1 (97295552) has not changed since last install.
 ##   Use `force = TRUE` to force installation</code></pre>
 </div>
 <div id="load-libraries" class="section level2">
@@ -212,7 +213,9 @@ library(openxlsx)
 library(viridis)
 library(stringr)
 library(svglite)
-library(crisscrosslinker)</code></pre>
+library(crisscrosslinker)
+library(XML)
+library(RCurl)</code></pre>
 </div>
 <div id="defining-our-variables" class="section level2">
 <h2>Defining Our Variables</h2>
@@ -587,38 +590,82 @@ for(rname in repeat_names){ #going through each of the repeats
 <p>We can then see the results on a heatmap by using the code we used before:</p>
 <pre class="r"><code>bs_repeats_freqVector &lt;- rbd.freqVector(bs_output = bs_output_repeats_uniprot,
                name_by = &#39;pro_name&#39;,
+               db_selection = &#39;UniProt&#39;,
                heatmap = TRUE)</code></pre>
 <pre><code>## Saving 7 x 5 in image</code></pre>
 <p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
 <div id="visualizing-on-a-pdb-structure" class="section level2">
 <h2>Visualizing on a PDB Structure</h2>
-<p>Before we can visualize the repeats on a structure, we must first align them to a PDB structure. We can use a similar code to what we used before, but replace the <code>align_to</code> variable from “UniProt” to “PDB”.</p>
-<pre class="r"><code>bs_output_repeats_pdb &lt;- data.frame() #initializing dataframe
-num_repeats &lt;- 1:4 #list of repeats 1 through 4
-repeat_names &lt;- paste0(&#39;Repeat0&#39;,num_repeats) #making the names of repeats (e.g. Repeat01, Repeat02, etc.)
+<p>Before we can visualize the repeats on a structure, we must first align them to a PDB structure. We can align the sequences we found using UniProt by using the function <code>rbd.alignBS2</code> and creating a <code>data.frame</code> of the relevant protein names, their corresponding UniProt IDs, and the PDB ID:</p>
+<pre class="r"><code>alignIDs &lt;- data.frame(protID=c(&#39;EZH2_Q15910-2&#39;,&#39;EED_O75530&#39;,&#39;RBBP4_Q09028&#39;,&#39;SUZ12_Q15022&#39;,&#39;AEBP2_Q6ZN18&#39;),uniprotID=c(&#39;Q15910-2&#39;,&#39;O75530&#39;,&#39;Q09028&#39;,&#39;Q15022&#39;,&#39;Q6ZN18-2&#39;),pdbID=rep(&#39;6C23&#39;,5))
 
-for(rname in repeat_names){ #going through each of the repeats
-  shl &lt;- sequence_hit_list[startsWith(names(sequence_hit_list),rname)]
-  enames &lt;- paste0(rname,&#39;_&#39;,c(&#39;UV&#39;,&#39;NoXL&#39;))
-  input_eluate_table &lt;- rbd.makeIETable(shl, enames)
-  filtered_input_eluate_table &lt;- input_eluate_table[input_eluate_table$eluate &gt; 0,]
-  
-  #get binding sequences
-  bs_output_pdb &lt;- rbd.getBSfromIET(filtered_input_eluate_table,
-                                  fasta_file = fasta_file,
-                                  align_to = &#39;PDB&#39;,
-                                  protein_dict = protein_dict)
-  
-  bs_output_repeats_pdb &lt;- rbind(bs_output_repeats_pdb,data.frame(bs_output_pdb)) #add data to data.frame
-}</code></pre>
+bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,alignTo=c(&#39;pdb&#39;),uniprot2pdb=TRUE,allowPartialBS=FALSE)</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>##   Note: Accessing on-line PDB file
+## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2 
+## Getting sequence from Uniprot: &gt;sp|Q6ZN18|AEBP2_HUMAN Zinc finger protein AEBP2 OS=Homo sapiens OX=9606 GN=AEBP2 PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2 
+## Getting sequence from Uniprot: &gt;sp|Q09028|RBBP4_HUMAN Histone-binding protein RBBP4 OS=Homo sapiens OX=9606 GN=RBBP4 PE=1 SV=3</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
 <p>Now that we have loaded the data into our R environment and have initialized the data, let’s make a PyMOL file. By default, it will also create a heatmap with the same color scheme as the PyMOL file if <code>heatmap</code> is kept as <code>TRUE</code> whose numbering will correspond to the amino acid number in the chain’s sequence, which may be different than that of the RCSB database. A legend will also be generated to go with the PyMOL file, though it will be similar to the one generated by the heatmap:</p>
-<pre class="r"><code>rbd.pymol(bs_output_repeats_pdb, 
+<pre class="r"><code>rbd.pymol(bs_output_repeats_pdb2, 
           color_by = &#39;freq&#39;, 
           colors = &#39;magma&#39;, 
           file.name = &#39;pymol_magma_diff_analysis.pml&#39;)</code></pre>
-<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>As you can see from the heatmap, there are 5 chains that contained our sequences of interest. However, two of these chains (C and K) both represent EZH2 as we can see on the RCSB PDB website:</p>
+<p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_xlms/ezh2_coverage2.png?raw=true" /></p>
+<p>We can then use the rest of the files generated by <code>rbd.pymol</code> to load the generated .pml file into PyMOL:</p>
 <p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_rbdmap/pymol_magma_diff_analysis3.gif?raw=true" style="width:70.0%" /></p>
+<p>And the SVG file as a legend to show what each color represents (will be the same color scheme as the generated heatmap):</p>
 <p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_rbdmap/freqvector_legend_test2.png?raw=true" style="width:15.0%" /></p>
 </div>
 </div>
@@ -627,105 +674,102 @@ for(rname in repeat_names){ #going through each of the repeats
 <pre class="r"><code>devtools::session_info()</code></pre>
 <pre><code>## ─ Session info ──────────────────────────────────────────────────────────────────────────────
 ##  setting  value                       
-##  version  R version 3.5.1 (2018-07-02)
-##  os       macOS  10.14.3              
+##  version  R version 3.6.1 (2019-07-05)
+##  os       macOS Mojave 10.14.3        
 ##  system   x86_64, darwin15.6.0        
-##  ui       RStudio                     
+##  ui       X11                         
 ##  language (EN)                        
 ##  collate  en_US.UTF-8                 
 ##  ctype    en_US.UTF-8                 
 ##  tz       Australia/Melbourne         
-##  date     2019-09-10                  
+##  date     2019-10-22                  
 ## 
 ## ─ Packages ──────────────────────────────────────────────────────────────────────────────────
 ##  package          * version    date       lib source                                   
-##  ade4               1.7-13     2018-08-31 [1] CRAN (R 3.5.0)                           
-##  assertthat         0.2.1      2019-03-21 [1] CRAN (R 3.5.2)                           
-##  backports          1.1.4      2019-04-10 [1] CRAN (R 3.5.2)                           
-##  bio3d            * 2.3-4      2018-04-03 [1] CRAN (R 3.5.0)                           
-##  BiocGenerics     * 0.28.0     2018-10-30 [1] Bioconductor                             
-##  Biostrings       * 2.50.2     2019-01-03 [1] Bioconductor                             
-##  bitops           * 1.0-6      2013-08-17 [1] CRAN (R 3.5.0)                           
-##  callr              3.3.1      2019-07-18 [1] CRAN (R 3.5.2)                           
-##  cli                1.1.0      2019-03-19 [1] CRAN (R 3.5.2)                           
-##  codetools          0.2-16     2018-12-24 [1] CRAN (R 3.5.2)                           
-##  colorspace         1.4-1      2019-03-18 [1] CRAN (R 3.5.2)                           
-##  crayon             1.3.4      2017-09-16 [1] CRAN (R 3.5.0)                           
-##  crisscrosslinker * 0.9        2019-09-03 [1] Github (egmg726/crisscrosslinker@2238988)
-##  curl             * 4.0        2019-07-22 [1] CRAN (R 3.5.2)                           
-##  desc               1.2.0      2018-05-01 [1] CRAN (R 3.5.0)                           
-##  devtools         * 2.1.0      2019-07-06 [1] CRAN (R 3.5.1)                           
-##  digest             0.6.20     2019-07-04 [1] CRAN (R 3.5.2)                           
-##  dplyr              0.8.3      2019-07-04 [1] CRAN (R 3.5.2)                           
-##  evaluate           0.14       2019-05-28 [1] CRAN (R 3.5.2)                           
-##  fs                 1.3.1      2019-05-06 [1] CRAN (R 3.5.2)                           
-##  gdtools          * 0.1.9      2019-06-18 [1] CRAN (R 3.5.2)                           
-##  ggplot2          * 3.2.1      2019-08-10 [1] CRAN (R 3.5.2)                           
-##  glue               1.3.1      2019-03-12 [1] CRAN (R 3.5.2)                           
-##  gridExtra          2.3        2017-09-09 [1] CRAN (R 3.5.0)                           
-##  gtable             0.3.0      2019-03-25 [1] CRAN (R 3.5.2)                           
-##  highr              0.8        2019-03-20 [1] CRAN (R 3.5.2)                           
-##  htmltools          0.3.6      2017-04-28 [1] CRAN (R 3.5.0)                           
-##  httr             * 1.4.1      2019-08-05 [1] CRAN (R 3.5.2)                           
-##  IRanges          * 2.16.0     2018-10-30 [1] Bioconductor                             
-##  jsonlite         * 1.6        2018-12-07 [1] CRAN (R 3.5.0)                           
-##  knitr              1.24       2019-08-08 [1] CRAN (R 3.5.2)                           
-##  labeling           0.3        2014-08-23 [1] CRAN (R 3.5.0)                           
-##  lattice            0.20-38    2018-11-04 [1] CRAN (R 3.5.0)                           
-##  lava               1.6.6      2019-08-01 [1] CRAN (R 3.5.2)                           
-##  lazyeval           0.2.2      2019-03-15 [1] CRAN (R 3.5.2)                           
-##  magrittr           1.5        2014-11-22 [1] CRAN (R 3.5.0)                           
-##  MASS               7.3-51.4   2019-03-31 [1] CRAN (R 3.5.2)                           
-##  Matrix             1.2-17     2019-03-22 [1] CRAN (R 3.5.2)                           
-##  memoise            1.1.0      2017-04-21 [1] CRAN (R 3.5.0)                           
-##  munsell            0.5.0      2018-06-12 [1] CRAN (R 3.5.0)                           
-##  openxlsx         * 4.1.0.1    2019-05-28 [1] CRAN (R 3.5.2)                           
-##  pillar             1.4.2      2019-06-29 [1] CRAN (R 3.5.2)                           
-##  pkgbuild           1.0.5      2019-08-26 [1] CRAN (R 3.5.2)                           
-##  pkgconfig          2.0.2      2018-08-16 [1] CRAN (R 3.5.0)                           
-##  pkgload            1.0.2      2018-10-29 [1] CRAN (R 3.5.0)                           
-##  plyr               1.8.4      2016-06-08 [1] CRAN (R 3.5.0)                           
-##  prettyunits        1.0.2      2015-07-13 [1] CRAN (R 3.5.0)                           
-##  processx           3.4.1      2019-07-18 [1] CRAN (R 3.5.2)                           
-##  prodlim            2018.04.18 2018-04-18 [1] CRAN (R 3.5.0)                           
-##  ps                 1.3.0      2018-12-21 [1] CRAN (R 3.5.0)                           
-##  purrr              0.3.2      2019-03-15 [1] CRAN (R 3.5.2)                           
-##  R6                 2.4.0      2019-02-14 [1] CRAN (R 3.5.2)                           
-##  RColorBrewer     * 1.1-2      2014-12-07 [1] CRAN (R 3.5.0)                           
-##  Rcpp               1.0.2      2019-07-25 [1] CRAN (R 3.5.2)                           
-##  RCurl            * 1.95-4.12  2019-03-04 [1] CRAN (R 3.5.2)                           
-##  remotes            2.1.0      2019-06-24 [1] CRAN (R 3.5.2)                           
-##  reshape2         * 1.4.3      2017-12-11 [1] CRAN (R 3.5.0)                           
-##  rlang              0.4.0      2019-06-25 [1] CRAN (R 3.5.2)                           
-##  rmarkdown          1.15       2019-08-21 [1] CRAN (R 3.5.2)                           
-##  rprojroot          1.3-2      2018-01-03 [1] CRAN (R 3.5.0)                           
-##  rstudioapi         0.10       2019-03-19 [1] CRAN (R 3.5.2)                           
-##  S4Vectors        * 0.20.1     2018-11-09 [1] Bioconductor                             
-##  scales             1.0.0      2018-08-09 [1] CRAN (R 3.5.0)                           
-##  seqinr           * 3.4-5      2017-08-01 [1] CRAN (R 3.5.0)                           
-##  sessioninfo        1.1.1      2018-11-05 [1] CRAN (R 3.5.0)                           
-##  stringi            1.4.3      2019-03-12 [1] CRAN (R 3.5.2)                           
-##  stringr          * 1.4.0      2019-02-10 [1] CRAN (R 3.5.2)                           
-##  survival           2.44-1.1   2019-04-01 [1] CRAN (R 3.5.2)                           
-##  svglite          * 1.2.2      2019-05-17 [1] CRAN (R 3.5.2)                           
-##  testthat           2.2.1      2019-07-25 [1] CRAN (R 3.5.2)                           
-##  tibble             2.1.3      2019-06-06 [1] CRAN (R 3.5.2)                           
-##  tidyselect         0.2.5      2018-10-11 [1] CRAN (R 3.5.0)                           
-##  tufte            * 0.5        2019-05-12 [1] CRAN (R 3.5.2)                           
-##  usethis          * 1.5.1      2019-07-04 [1] CRAN (R 3.5.2)                           
-##  viridis          * 0.5.1      2018-03-29 [1] CRAN (R 3.5.0)                           
-##  viridisLite      * 0.3.0      2018-02-01 [1] CRAN (R 3.5.0)                           
-##  wesanderson      * 0.3.6      2018-04-20 [1] CRAN (R 3.5.0)                           
-##  withr              2.1.2      2018-03-15 [1] CRAN (R 3.5.0)                           
-##  xfun               0.9        2019-08-21 [1] CRAN (R 3.5.2)                           
-##  XML              * 3.98-1.20  2019-06-06 [1] CRAN (R 3.5.2)                           
-##  xml2               1.2.2      2019-08-09 [1] CRAN (R 3.5.2)                           
-##  XVector          * 0.22.0     2018-10-30 [1] Bioconductor                             
-##  yaml               2.2.0      2018-07-25 [1] CRAN (R 3.5.0)                           
-##  zip                2.0.4      2019-09-01 [1] CRAN (R 3.5.2)                           
-##  zlibbioc           1.28.0     2018-10-30 [1] Bioconductor                             
+##  ade4               1.7-13     2018-08-31 [1] CRAN (R 3.6.0)                           
+##  assertthat         0.2.1      2019-03-21 [1] CRAN (R 3.6.0)                           
+##  backports          1.1.5      2019-10-02 [1] CRAN (R 3.6.0)                           
+##  bio3d            * 2.3-4      2018-04-03 [1] CRAN (R 3.6.0)                           
+##  BiocGenerics     * 0.30.0     2019-05-02 [1] Bioconductor                             
+##  Biostrings       * 2.52.0     2019-05-02 [1] Bioconductor                             
+##  bitops           * 1.0-6      2013-08-17 [1] CRAN (R 3.6.0)                           
+##  callr              3.3.2      2019-09-22 [1] CRAN (R 3.6.0)                           
+##  cli                1.1.0      2019-03-19 [1] CRAN (R 3.6.0)                           
+##  colorspace         1.4-1      2019-03-18 [1] CRAN (R 3.6.0)                           
+##  crayon             1.3.4      2017-09-16 [1] CRAN (R 3.6.0)                           
+##  crisscrosslinker * 0.9        2019-10-22 [1] Github (egmg726/crisscrosslinker@9729555)
+##  curl               4.2        2019-09-24 [1] CRAN (R 3.6.0)                           
+##  desc               1.2.0      2018-05-01 [1] CRAN (R 3.6.0)                           
+##  devtools         * 2.2.1      2019-09-24 [1] CRAN (R 3.6.0)                           
+##  digest             0.6.22     2019-10-21 [1] CRAN (R 3.6.1)                           
+##  dplyr              0.8.3      2019-07-04 [1] CRAN (R 3.6.0)                           
+##  ellipsis           0.3.0      2019-09-20 [1] CRAN (R 3.6.0)                           
+##  evaluate           0.14       2019-05-28 [1] CRAN (R 3.6.0)                           
+##  fs                 1.3.1      2019-05-06 [1] CRAN (R 3.6.0)                           
+##  gdtools          * 0.2.1      2019-10-14 [1] CRAN (R 3.6.0)                           
+##  ggplot2          * 3.2.1      2019-08-10 [1] CRAN (R 3.6.0)                           
+##  glue               1.3.1      2019-03-12 [1] CRAN (R 3.6.0)                           
+##  gridExtra          2.3        2017-09-09 [1] CRAN (R 3.6.0)                           
+##  gtable             0.3.0      2019-03-25 [1] CRAN (R 3.6.0)                           
+##  highr              0.8        2019-03-20 [1] CRAN (R 3.6.0)                           
+##  htmltools          0.4.0      2019-10-04 [1] CRAN (R 3.6.0)                           
+##  httr               1.4.1      2019-08-05 [1] CRAN (R 3.6.0)                           
+##  IRanges          * 2.18.3     2019-09-24 [1] Bioconductor                             
+##  jsonlite           1.6        2018-12-07 [1] CRAN (R 3.6.0)                           
+##  knitr              1.25       2019-09-18 [1] CRAN (R 3.6.0)                           
+##  labeling           0.3        2014-08-23 [1] CRAN (R 3.6.0)                           
+##  lattice            0.20-38    2018-11-04 [1] CRAN (R 3.6.1)                           
+##  lava               1.6.6      2019-08-01 [1] CRAN (R 3.6.0)                           
+##  lazyeval           0.2.2      2019-03-15 [1] CRAN (R 3.6.0)                           
+##  magrittr           1.5        2014-11-22 [1] CRAN (R 3.6.0)                           
+##  MASS               7.3-51.4   2019-03-31 [1] CRAN (R 3.6.1)                           
+##  Matrix             1.2-17     2019-03-22 [1] CRAN (R 3.6.1)                           
+##  memoise            1.1.0      2017-04-21 [1] CRAN (R 3.6.0)                           
+##  munsell            0.5.0      2018-06-12 [1] CRAN (R 3.6.0)                           
+##  openxlsx         * 4.1.0.1    2019-05-28 [1] CRAN (R 3.6.0)                           
+##  pillar             1.4.2      2019-06-29 [1] CRAN (R 3.6.0)                           
+##  pkgbuild           1.0.6      2019-10-09 [1] CRAN (R 3.6.0)                           
+##  pkgconfig          2.0.3      2019-09-22 [1] CRAN (R 3.6.0)                           
+##  pkgload            1.0.2      2018-10-29 [1] CRAN (R 3.6.0)                           
+##  prettyunits        1.0.2      2015-07-13 [1] CRAN (R 3.6.0)                           
+##  processx           3.4.1      2019-07-18 [1] CRAN (R 3.6.0)                           
+##  prodlim            2018.04.18 2018-04-18 [1] CRAN (R 3.6.0)                           
+##  ps                 1.3.0      2018-12-21 [1] CRAN (R 3.6.0)                           
+##  purrr              0.3.2      2019-03-15 [1] CRAN (R 3.6.0)                           
+##  R6                 2.4.0      2019-02-14 [1] CRAN (R 3.6.0)                           
+##  RColorBrewer     * 1.1-2      2014-12-07 [1] CRAN (R 3.6.0)                           
+##  Rcpp               1.0.2      2019-07-25 [1] CRAN (R 3.6.0)                           
+##  RCurl            * 1.95-4.12  2019-03-04 [1] CRAN (R 3.6.0)                           
+##  remotes            2.1.0      2019-06-24 [1] CRAN (R 3.6.0)                           
+##  rlang              0.4.0      2019-06-25 [1] CRAN (R 3.6.0)                           
+##  rmarkdown          1.16       2019-10-01 [1] CRAN (R 3.6.0)                           
+##  rprojroot          1.3-2      2018-01-03 [1] CRAN (R 3.6.0)                           
+##  S4Vectors        * 0.22.1     2019-09-09 [1] Bioconductor                             
+##  scales             1.0.0      2018-08-09 [1] CRAN (R 3.6.0)                           
+##  seqinr           * 3.6-1      2019-09-07 [1] CRAN (R 3.6.0)                           
+##  sessioninfo        1.1.1      2018-11-05 [1] CRAN (R 3.6.0)                           
+##  stringi            1.4.3      2019-03-12 [1] CRAN (R 3.6.0)                           
+##  stringr          * 1.4.0      2019-02-10 [1] CRAN (R 3.6.0)                           
+##  survival           2.44-1.1   2019-04-01 [1] CRAN (R 3.6.1)                           
+##  svglite          * 1.2.2      2019-05-17 [1] CRAN (R 3.6.0)                           
+##  systemfonts        0.1.1      2019-07-01 [1] CRAN (R 3.6.0)                           
+##  testthat           2.2.1      2019-07-25 [1] CRAN (R 3.6.0)                           
+##  tibble             2.1.3      2019-06-06 [1] CRAN (R 3.6.0)                           
+##  tidyselect         0.2.5      2018-10-11 [1] CRAN (R 3.6.0)                           
+##  tufte            * 0.5        2019-05-12 [1] CRAN (R 3.6.0)                           
+##  usethis          * 1.5.1      2019-07-04 [1] CRAN (R 3.6.0)                           
+##  viridis          * 0.5.1      2018-03-29 [1] CRAN (R 3.6.0)                           
+##  viridisLite      * 0.3.0      2018-02-01 [1] CRAN (R 3.6.0)                           
+##  withr              2.1.2      2018-03-15 [1] CRAN (R 3.6.0)                           
+##  xfun               0.10       2019-10-01 [1] CRAN (R 3.6.0)                           
+##  XML              * 3.98-1.20  2019-06-06 [1] CRAN (R 3.6.0)                           
+##  xml2               1.2.2      2019-08-09 [1] CRAN (R 3.6.0)                           
+##  XVector          * 0.24.0     2019-05-02 [1] Bioconductor                             
+##  yaml               2.2.0      2018-07-25 [1] CRAN (R 3.6.0)                           
+##  zip                2.0.4      2019-09-01 [1] CRAN (R 3.6.0)                           
+##  zlibbioc           1.30.0     2019-05-02 [1] Bioconductor                             
 ## 
-## [1] /Library/Frameworks/R.framework/Versions/3.5/Resources/library</code></pre>
+## [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library</code></pre>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>
