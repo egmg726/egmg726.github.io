@@ -601,60 +601,7 @@ for(rname in repeat_names){ #going through each of the repeats
 <pre class="r"><code>alignIDs &lt;- data.frame(protID=c(&#39;EZH2_Q15910-2&#39;,&#39;EED_O75530&#39;,&#39;RBBP4_Q09028&#39;,&#39;SUZ12_Q15022&#39;,&#39;AEBP2_Q6ZN18&#39;),uniprotID=c(&#39;Q15910-2&#39;,&#39;O75530&#39;,&#39;Q09028&#39;,&#39;Q15022&#39;,&#39;Q6ZN18-2&#39;),pdbID=rep(&#39;6C23&#39;,5))
 
 bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,alignTo=c(&#39;pdb&#39;),uniprot2pdb=TRUE,allowPartialBS=FALSE)</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>##   Note: Accessing on-line PDB file
-## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15022|SUZ12_HUMAN Polycomb protein SUZ12 OS=Homo sapiens OX=9606 GN=SUZ12 PE=1 SV=3</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2 
-## Getting sequence from Uniprot: &gt;sp|Q6ZN18|AEBP2_HUMAN Zinc finger protein AEBP2 OS=Homo sapiens OX=9606 GN=AEBP2 PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|Q15910|EZH2_HUMAN Histone-lysine N-methyltransferase EZH2 OS=Homo sapiens OX=9606 GN=EZH2 PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.
-## No encoding supplied: defaulting to UTF-8.</code></pre>
-<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
-## uniprot.PDBmap range</code></pre>
-<pre><code>## Getting sequence from Uniprot: &gt;sp|O75530|EED_HUMAN Polycomb protein EED OS=Homo sapiens OX=9606 GN=EED PE=1 SV=2 
-## Getting sequence from Uniprot: &gt;sp|Q09028|RBBP4_HUMAN Histone-binding protein RBBP4 OS=Homo sapiens OX=9606 GN=RBBP4 PE=1 SV=3</code></pre>
-<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+
 <p>Now that we have loaded the data into our R environment and have initialized the data, let’s make a PyMOL file. By default, it will also create a heatmap with the same color scheme as the PyMOL file if <code>heatmap</code> is kept as <code>TRUE</code> whose numbering will correspond to the amino acid number in the chain’s sequence, which may be different than that of the RCSB database. A legend will also be generated to go with the PyMOL file, though it will be similar to the one generated by the heatmap:</p>
 <pre class="r"><code>rbd.pymol(bs_output_repeats_pdb2, 
           color_by = &#39;freq&#39;, 
