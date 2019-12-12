@@ -12,7 +12,7 @@
 
 <meta name="author" content="Emma Gail" />
 
-<meta name="date" content="2019-10-22" />
+<meta name="date" content="2019-12-12" />
 
 <title>Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</title>
 
@@ -180,7 +180,7 @@ summary {
 
 <h1 class="title toc-ignore">Mapping protein-RNA interactions between a recombinant human PRC2 to RNA using RBDmap</h1>
 <h4 class="author">Emma Gail</h4>
-<h4 class="date">2019-10-22</h4>
+<h4 class="date">2019-12-12</h4>
 
 </div>
 
@@ -197,7 +197,6 @@ summary {
 <p>If you have not done so already, please install <code>crisscrosslinkeR</code>:</p>
 <pre class="r"><code>library(devtools)
 install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
-
 </div>
 <div id="load-libraries" class="section level2">
 <h2>Load Libraries</h2>
@@ -528,7 +527,7 @@ protein_dict</code></pre>
 </div>
 <div id="making-the-pymol-file" class="section level2">
 <h2>Making the PyMOL File</h2>
-<p>Now that we have the binding sequences aligned to a PDB file, we can create a PyMOL file (.pml). The <code>rbd.pymol</code> function will produce a .pml file that is essentially a plain text file which contains commands that can be read by PyMOL. Learn more about PyMOL commands <a href="http://pymol.sourceforge.net/newman/user/S0210start_cmds.html">here</a>.</p>
+<p>Now that we have the binding sequences aligned to a PDB file, we can create a PyMOL file (.pml). The <code>rbd.pymol</code> function will produce a .pml file in your working directory that is essentially a plain text file which contains commands that can be read by PyMOL. Learn more about PyMOL commands <a href="http://pymol.sourceforge.net/newman/user/S0210start_cmds.html">here</a>.</p>
 <pre class="r"><code>rbd.pymol(bs_ezh2, 
           color_by = &#39;binding_sequence&#39;,
           colors = NULL) #default colors</code></pre>
@@ -556,7 +555,7 @@ protein_dict</code></pre>
           colors = c(&quot;#f8a1be&quot;,&quot;#ffb6b1&quot;), # hexcodes
           file.name = &#39;pymol_hexcodes.pml&#39;) </code></pre>
 <p><img src="nsmb_rbdmap_new_html_files/figure-html/unnamed-chunk-22-4.png" width="672" /></p>
-<p><img src="https://raw.githubusercontent.com/egmg726/egmg726.github.io/master/img/workflows/prc2_rbdmap/prc2_rbd_all.png" width="672" /></p>
+
 </div>
 </div>
 <div id="visualizing-multiple-repeats" class="section level1">
@@ -599,7 +598,45 @@ for(rname in repeat_names){ #going through each of the repeats
 <pre class="r"><code>alignIDs &lt;- data.frame(protID=c(&#39;EZH2_Q15910-2&#39;,&#39;EED_O75530&#39;,&#39;RBBP4_Q09028&#39;,&#39;SUZ12_Q15022&#39;,&#39;AEBP2_Q6ZN18&#39;),uniprotID=c(&#39;Q15910-2&#39;,&#39;O75530&#39;,&#39;Q09028&#39;,&#39;Q15022&#39;,&#39;Q6ZN18-2&#39;),pdbID=rep(&#39;6C23&#39;,5))
 
 bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,alignTo=c(&#39;pdb&#39;),uniprot2pdb=TRUE,allowPartialBS=FALSE)</code></pre>
-
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.
+## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre><code>## Warning in rbd.alignBS2(bs_output_repeats_uniprot, alignIDs, alignTo = c(&quot;pdb&quot;), : NA within
+## uniprot.PDBmap range</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
 <p>Now that we have loaded the data into our R environment and have initialized the data, let’s make a PyMOL file. By default, it will also create a heatmap with the same color scheme as the PyMOL file if <code>heatmap</code> is kept as <code>TRUE</code> whose numbering will correspond to the amino acid number in the chain’s sequence, which may be different than that of the RCSB database. A legend will also be generated to go with the PyMOL file, though it will be similar to the one generated by the heatmap:</p>
 <pre class="r"><code>rbd.pymol(bs_output_repeats_pdb2, 
           color_by = &#39;freq&#39;, 
@@ -627,7 +664,7 @@ bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,ali
 ##  collate  en_US.UTF-8                 
 ##  ctype    en_US.UTF-8                 
 ##  tz       Australia/Melbourne         
-##  date     2019-10-22                  
+##  date     2019-12-12                  
 ## 
 ## ─ Packages ──────────────────────────────────────────────────────────────────────────────────
 ##  package          * version    date       lib source                                   
@@ -642,10 +679,10 @@ bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,ali
 ##  cli                1.1.0      2019-03-19 [1] CRAN (R 3.6.0)                           
 ##  colorspace         1.4-1      2019-03-18 [1] CRAN (R 3.6.0)                           
 ##  crayon             1.3.4      2017-09-16 [1] CRAN (R 3.6.0)                           
-##  crisscrosslinker * 0.9        2019-10-22 [1] Github (egmg726/crisscrosslinker@9729555)
+##  crisscrosslinker * 0.9        2019-12-12 [1] Github (egmg726/crisscrosslinker@da641df)
 ##  curl               4.2        2019-09-24 [1] CRAN (R 3.6.0)                           
 ##  desc               1.2.0      2018-05-01 [1] CRAN (R 3.6.0)                           
-##  devtools         * 2.2.1      2019-09-24 [1] CRAN (R 3.6.0)                           
+##  devtools           2.2.1      2019-09-24 [1] CRAN (R 3.6.0)                           
 ##  digest             0.6.22     2019-10-21 [1] CRAN (R 3.6.1)                           
 ##  dplyr              0.8.3      2019-07-04 [1] CRAN (R 3.6.0)                           
 ##  ellipsis           0.3.0      2019-09-20 [1] CRAN (R 3.6.0)                           
@@ -661,7 +698,7 @@ bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,ali
 ##  httr               1.4.1      2019-08-05 [1] CRAN (R 3.6.0)                           
 ##  IRanges          * 2.18.3     2019-09-24 [1] Bioconductor                             
 ##  jsonlite           1.6        2018-12-07 [1] CRAN (R 3.6.0)                           
-##  knitr              1.25       2019-09-18 [1] CRAN (R 3.6.0)                           
+##  knitr              1.26       2019-11-12 [1] CRAN (R 3.6.0)                           
 ##  labeling           0.3        2014-08-23 [1] CRAN (R 3.6.0)                           
 ##  lattice            0.20-38    2018-11-04 [1] CRAN (R 3.6.1)                           
 ##  lava               1.6.6      2019-08-01 [1] CRAN (R 3.6.0)                           
@@ -671,23 +708,23 @@ bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,ali
 ##  Matrix             1.2-17     2019-03-22 [1] CRAN (R 3.6.1)                           
 ##  memoise            1.1.0      2017-04-21 [1] CRAN (R 3.6.0)                           
 ##  munsell            0.5.0      2018-06-12 [1] CRAN (R 3.6.0)                           
-##  openxlsx         * 4.1.0.1    2019-05-28 [1] CRAN (R 3.6.0)                           
+##  openxlsx         * 4.1.3      2019-11-07 [1] CRAN (R 3.6.0)                           
 ##  pillar             1.4.2      2019-06-29 [1] CRAN (R 3.6.0)                           
 ##  pkgbuild           1.0.6      2019-10-09 [1] CRAN (R 3.6.0)                           
 ##  pkgconfig          2.0.3      2019-09-22 [1] CRAN (R 3.6.0)                           
 ##  pkgload            1.0.2      2018-10-29 [1] CRAN (R 3.6.0)                           
 ##  prettyunits        1.0.2      2015-07-13 [1] CRAN (R 3.6.0)                           
 ##  processx           3.4.1      2019-07-18 [1] CRAN (R 3.6.0)                           
-##  prodlim            2018.04.18 2018-04-18 [1] CRAN (R 3.6.0)                           
+##  prodlim            2019.10.13 2019-11-03 [1] CRAN (R 3.6.0)                           
 ##  ps                 1.3.0      2018-12-21 [1] CRAN (R 3.6.0)                           
-##  purrr              0.3.2      2019-03-15 [1] CRAN (R 3.6.0)                           
-##  R6                 2.4.0      2019-02-14 [1] CRAN (R 3.6.0)                           
+##  purrr              0.3.3      2019-10-18 [1] CRAN (R 3.6.0)                           
+##  R6                 2.4.1      2019-11-12 [1] CRAN (R 3.6.0)                           
 ##  RColorBrewer     * 1.1-2      2014-12-07 [1] CRAN (R 3.6.0)                           
-##  Rcpp               1.0.2      2019-07-25 [1] CRAN (R 3.6.0)                           
+##  Rcpp               1.0.3      2019-11-08 [1] CRAN (R 3.6.0)                           
 ##  RCurl            * 1.95-4.12  2019-03-04 [1] CRAN (R 3.6.0)                           
 ##  remotes            2.1.0      2019-06-24 [1] CRAN (R 3.6.0)                           
-##  rlang              0.4.0      2019-06-25 [1] CRAN (R 3.6.0)                           
-##  rmarkdown          1.16       2019-10-01 [1] CRAN (R 3.6.0)                           
+##  rlang              0.4.1      2019-10-24 [1] CRAN (R 3.6.0)                           
+##  rmarkdown          1.17       2019-11-13 [1] CRAN (R 3.6.0)                           
 ##  rprojroot          1.3-2      2018-01-03 [1] CRAN (R 3.6.0)                           
 ##  S4Vectors        * 0.22.1     2019-09-09 [1] Bioconductor                             
 ##  scales             1.0.0      2018-08-09 [1] CRAN (R 3.6.0)                           
@@ -695,18 +732,18 @@ bs_output_repeats_pdb2 &lt;- rbd.alignBS2(bs_output_repeats_uniprot,alignIDs,ali
 ##  sessioninfo        1.1.1      2018-11-05 [1] CRAN (R 3.6.0)                           
 ##  stringi            1.4.3      2019-03-12 [1] CRAN (R 3.6.0)                           
 ##  stringr          * 1.4.0      2019-02-10 [1] CRAN (R 3.6.0)                           
-##  survival           2.44-1.1   2019-04-01 [1] CRAN (R 3.6.1)                           
+##  survival           3.1-7      2019-11-09 [1] CRAN (R 3.6.0)                           
 ##  svglite          * 1.2.2      2019-05-17 [1] CRAN (R 3.6.0)                           
 ##  systemfonts        0.1.1      2019-07-01 [1] CRAN (R 3.6.0)                           
-##  testthat           2.2.1      2019-07-25 [1] CRAN (R 3.6.0)                           
+##  testthat           2.3.0      2019-11-05 [1] CRAN (R 3.6.0)                           
 ##  tibble             2.1.3      2019-06-06 [1] CRAN (R 3.6.0)                           
 ##  tidyselect         0.2.5      2018-10-11 [1] CRAN (R 3.6.0)                           
 ##  tufte            * 0.5        2019-05-12 [1] CRAN (R 3.6.0)                           
-##  usethis          * 1.5.1      2019-07-04 [1] CRAN (R 3.6.0)                           
+##  usethis            1.5.1      2019-07-04 [1] CRAN (R 3.6.0)                           
 ##  viridis          * 0.5.1      2018-03-29 [1] CRAN (R 3.6.0)                           
 ##  viridisLite      * 0.3.0      2018-02-01 [1] CRAN (R 3.6.0)                           
 ##  withr              2.1.2      2018-03-15 [1] CRAN (R 3.6.0)                           
-##  xfun               0.10       2019-10-01 [1] CRAN (R 3.6.0)                           
+##  xfun               0.11       2019-11-12 [1] CRAN (R 3.6.0)                           
 ##  XML              * 3.98-1.20  2019-06-06 [1] CRAN (R 3.6.0)                           
 ##  xml2               1.2.2      2019-08-09 [1] CRAN (R 3.6.0)                           
 ##  XVector          * 0.24.0     2019-05-02 [1] Bioconductor                             
