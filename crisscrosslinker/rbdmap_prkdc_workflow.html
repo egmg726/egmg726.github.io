@@ -329,6 +329,7 @@ uniprotSeq &lt;- uniprot.fasta(uniprot.id, download_fasta = TRUE)</code></pre>
 <pre class="r"><code>pdb.info &lt;- blast.menu(sequence,database=&#39;pdb&#39;)
 pdb.id &lt;- pdb.info$pdb_id
 chain &lt;- pdb.info$chain</code></pre>
+<p> Once you have this information, you can use it to construct your <code>alignIDs</code> data.frame that will be used in section "Aligning the Sequence to UniProt/PDB Sequences"</p>
 </div>
 <div id="matching-the-sequences-to-uniprotpdb-using-identifiers-optional" class="section level2">
 <h2>Matching the Sequences to UniProt/PDB using Identifiers (Optional)</h2>
