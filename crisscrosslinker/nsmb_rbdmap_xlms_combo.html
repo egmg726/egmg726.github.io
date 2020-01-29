@@ -235,6 +235,7 @@ install_github(&#39;egmg726/crisscrosslinker&#39;)</code></pre>
 <p>The protein names between the XL-MS and RBDmap experiments should be consistent to ensure that they will be matched appropriately to each bar in xiNET.</p>
 <pre class="r"><code>rbd.xinet(bs_output_repeats_uniprot,database=&#39;UniProt&#39;,write.file = TRUE)</code></pre>
 <p>This function will produce an annotation file with the same default colors used for the heatmap above (For more information about what the annotation file is composed of, see the xiNET documentation <a href="http://crosslinkviewer.org/annotationCSV.php">here</a>. By combining this annotation file with the protein-protein interaction data from the XL-MS, you will be able to view both on the same image.</p>
+<p> You should now have 3 files: xlink_viewer.csv (for the viewer in your working directory), rbd_xinet.csv (for the annotation in your working directory), and PRC2_5m.fasta (for the fasta file, this is located within <code>crisscrosslinkeR</code>. You should be able to use these 3 files to visualize your data. </p>
 <p>Once you retrieve the output from xiNET, you should get something like this:</p>
 <p><img src="https://github.com/egmg726/egmg726.github.io/blob/master/img/workflows/prc2_combo/prc2_aep2_xinet_combo_noself.jpg?raw=true" />}</p>
 </div>
